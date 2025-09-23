@@ -115,7 +115,7 @@ body {
     position: relative;
 }
 
-/* 중앙 라인 */
+/* 중앙 타임라인 */
 .timeline-line {
     position: absolute;
     left: 50%;
@@ -123,7 +123,40 @@ body {
     width: 2px;
     height: 100%;
     background-color: var(--timeline-color);
-    z-index: 1;
+    z-index: 1; /* 가장 아래 */
+}
+
+/* 메인 이벤트 연결선 */
+.main-event-card::before {
+    content: '';
+    position: absolute;
+    top: 1.5rem;
+    height: 2px;
+    width: 2rem;
+    background-color: var(--timeline-color);
+    z-index: 2; /* 타임라인보다 위, 카드보다 아래 */
+}
+
+/* attached event 연결선 */
+.attached-event-card::before {
+    content: '';
+    position: absolute;
+    top: 1.5rem; /* 카드 중앙 */
+    height: 2px;
+    width: 2rem;
+    background-color: var(--timeline-color);
+    z-index: 2; /* 타임라인보다 위, 카드보다 아래 */
+}
+
+/* 모든 카드들 */
+.main-event-card,
+.attached-event-card,
+.sub-event-card {
+    z-index: 10; /* 연결선보다 위 */
+}
+
+.time-node-label {
+    z-index: 20; /* 가장 위 */
 }
 
 /* 시간 노드 컨테이너 */
@@ -421,7 +454,7 @@ body {
     position: absolute;
     width: 50%;
     z-index: 15;
-    top: -10px; /* 시간 레이블과 수평이 되도록 위치 조정 */
+    top: -20px; /* 시간 레이블 중앙과 맞추기 위해 조정 */
 }
 
 .attached-event.left {
@@ -868,5 +901,6 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
