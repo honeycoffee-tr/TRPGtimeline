@@ -564,6 +564,29 @@ body {
     line-height: 1.4;
 }
 
+.attached-events-container {
+    position: relative;
+    min-height: 0; /* 기본적으로 높이 없음 */
+    transition: all 0.3s ease; /* 부드러운 확장 애니메이션 */
+}
+
+/* attached event가 확장되었을 때 컨테이너 높이 자동 조정 */
+.attached-events-container:has(.attached-event-content-detail) {
+    margin-bottom: 1rem; /* 확장 시 아래 여백 추가 */
+}
+
+.attached-event-content-detail {
+    padding: 1rem;
+    border-top: 1px solid #F3F4F6;
+    background-color: #F9FAFB;
+    font-size: 0.875rem;
+    color: var(--text-gray-700);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin-top: 0.5rem; /* 확장 내용과 카드 사이 간격 */
+    border-radius: 0 0 0.5rem 0.5rem; /* 아래쪽 모서리만 둥글게 */
+}
+
 /* 공통 액션 버튼 */
 .action-btn {
     background: none;
@@ -901,6 +924,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
