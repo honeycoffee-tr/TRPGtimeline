@@ -672,42 +672,7 @@ class TRPGTimeline {
         });
     }
 
-    setupAttachedEventListeners(container, event) {
-    const card = container.querySelector('.attached-event-card');
-    const header = container.querySelector('.attached-event-header');
-
-    // 드래그
-    card.addEventListener('dragstart', (e) => {
-        e.stopPropagation();
-        this.draggedEvent = event;
-        card.classList.add('dragging');
-    });
-
-    card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
-        this.draggedEvent = null;
-    });
-
-    // 확장/축소 - 헤더 클릭 시
-    if (header) {
-        header.addEventListener('click', (e) => {
-            if (!this.draggedEvent) {
-                this.toggleEventExpansion(event.id);
-            }
-        });
-    }
-
-    // 수정/삭제 버튼
-    container.querySelector('.edit-event').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.editEvent(event);
-    });
-
-    container.querySelector('.delete-event').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.deleteEvent(event.id);
-    });
-}
+    
     // 드래그 앤 드롭 핸들러들
     handleEventDrop(targetTimeNodeId, targetOrder = null) {
         if (!this.draggedEvent) return;
@@ -1328,6 +1293,7 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
 
 
