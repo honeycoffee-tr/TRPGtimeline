@@ -764,14 +764,29 @@ class TRPGTimeline {
 
     // 이벤트 관리 함수들
     toggleEventExpansion(eventId) {
-        this.events = this.events.map(event => 
-            event.id === eventId 
-                ? { ...event, expanded: !event.expanded }
-                : event
-        );
-        this.renderTimeline();
-        lucide.createIcons();
-    }
+    this.events = this.events.map(event => 
+        event.id === eventId 
+            ? { ...event, expanded: !event.expanded }
+            : event
+    );
+    
+    // attached event 컨테이너 클래스 업데이트
+    setTimeout(() => {
+        const expandedAttachedEvents = document.querySelectorAll('.attached-event-content-detail');
+        const containers = document.querySelectorAll('.attached-events-container');
+        
+        containers.forEach(container => {
+            if (container.querySelector('.attached-event-content-detail')) {
+                container.classList.add('expanded');
+            } else {
+                container.classList.remove('expanded');
+            }
+        });
+    }, 0);
+    
+    this.renderTimeline();
+    lucide.createIcons();
+}
 
     deleteEvent(eventId) {
         this.events = this.events.filter(event => event.id !== eventId);
@@ -1241,6 +1256,7 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
 
 
