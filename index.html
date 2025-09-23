@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRPG 시나리오 타임라인</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-info">
+                    <h1 id="scenario-title">TRPG 시나리오 타임라인</h1>
+                    <p id="scenario-base-year" class="scenario-meta"></p>
+                    <p id="scenario-overview" class="scenario-meta"></p>
+                </div>
+                <div class="header-buttons">
+                    <button id="scenario-btn" class="btn btn-secondary">
+                        <i data-lucide="file-text"></i>시나리오
+                    </button>
+                    <button id="time-btn" class="btn btn-secondary">
+                        <i data-lucide="clock"></i>시간 추가
+                    </button>
+                    <button id="event-btn" class="btn btn-primary">
+                        <i data-lucide="plus"></i>사건 추가
+                    </button>
+                    <button id="export-btn" class="btn btn-secondary">
+                        <i data-lucide="download"></i>내보내기
+                    </button>
+                    <label class="btn btn-secondary">
+                        <i data-lucide="upload"></i>가져오기
+                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 타임라인 -->
+        <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-line"></div>
+                <div id="timeline-content"></div>
+            </div>
+        </div>
+
+        <!-- 시나리오 설정 모달 -->
+        <div id="scenario-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>시나리오 설정</h2>
+                    <button class="modal-close" data-modal="scenario-modal">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>시나리오 제목</label>
+                        <input type="text" id="modal-scenario-title" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>시나리오 개요</label>
+                        <textarea id="modal-scenario-overview" class="form-textarea" placeholder="시나리오에 대한 간단한 설명을 입력하세요"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>기준 년도</label>
+                        <input type="text" id="modal-scenario-year" class="form-input" placeholder="예: 2024, 1994, 미래 3000년">
+                    </div>
+                    
+                    <div class="characters-section">
+                        <h3>등장인물</h3>
+                        <div class="character-form">
+                            <div class="character-input">
+                                <input type="text" id="character-name" class="form-input" placeholder="등장인물 이름">
+                                <input type="color" id="character-color" class="color-input" value="#3B82F6">
+                            </div>
+                            <button id="add-character-btn" class="btn btn-primary">추가</button>
+                        </div>
+                        <div id="characters-list" class="characters-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 시간 추가 모달 -->
+        <div id="time-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="time-modal-title">시간 추가</h2>
+                    <button class="modal-close" data-modal="time-modal">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>시간 종류</label>
+                        <select id="time-type" class="form-select">
+                            <option value="year">년도</option>
+                            <option value="month">월</option>
+                            <option value="day">일</option>
+                            <option value="time">시간 (AM/PM)</option>
+                            <option value="etc">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>부모 시간대 (선택사항)</label>
+                        <select id="parent-time" class="form-select">
+                            <option value="">상위 시간대 없음</option>
+                        </select>
+                    </div>
+                    <div id="time-inputs" class="time-inputs">
+                        <select id="time-ampm" class="form-select">
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                        </select>
+                        <input type="number" id="time-hour" class="form-input" min="1" max="12" placeholder="시">
+                        <input type="number" id="time-minute" class="form-input" min="0" max="59" placeholder="분">
+                    </div>
+                    <div class="form-group">
+                        <label>크기</label>
+                        <select id="time-size" class="form-select">
+                            <option value="small">작게</option>
+                            <option value="medium">보통</option>
+                            <option value="large">크게</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="time-value-group">
+                        <label>시간 값</label>
+                        <input type="text" id="time-value" class="form-input" placeholder="예: 2024, 3월, 15일, 중요한 순간">
+                    </div>
+                    <button id="save-time-btn" class="btn btn-primary">추가</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사건 추가 모달 -->
+        <div id="event-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="event-modal-title">사건 추가</h2>
+                    <button class="modal-close" data-modal="event-modal">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>시간대 선택</label>
+                        <select id="event-time" class="form-select">
+                            <option value="">시간대를 선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>사건 타입</label>
+                        <select id="event-type" class="form-select">
+                            <option value="main">메인 사건</option>
+                            <option value="sub">서브 사건</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>등장인물</label>
+                        <select id="event-character" class="form-select">
+                            <option value="">선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label id="event-title-label">사건 제목</label>
+                        <input type="text" id="event-title" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label id="event-content-label">상세 내용</label>
+                        <textarea id="event-content" class="form-textarea"></textarea>
+                        <div id="event-content-count" class="char-count"></div>
+                    </div>
+                    <div class="form-group" id="event-position-group">
+                        <label>위치</label>
+                        <select id="event-position" class="form-select">
+                            <option value="auto">자동 (번갈아가며)</option>
+                            <option value="right">오른쪽</option>
+                            <option value="left">왼쪽</option>
+                        </select>
+                    </div>
+                    <button id="save-event-btn" class="btn btn-primary">추가</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
