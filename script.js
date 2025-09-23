@@ -350,35 +350,37 @@ class TRPGTimeline {
     }
 
     createAttachedEventElement(event, index) {
-        const container = document.createElement('div');
-        const side = index % 2 === 0 ? 'left' : 'right';
-        const topPosition = 20 + index * 35;
-        
-        container.className = `attached-event ${side}`;
-        container.style.top = `${topPosition}px`;
-        
-        container.innerHTML = `
-            <div class="attached-event-card" draggable="true" data-event-id="${event.id}">
-                <div class="attached-event-content">
-                    <div>
-                        <div class="attached-event-character">${event.character}</div>
-                        <div class="attached-event-title">${event.title}</div>
+    const container = document.createElement('div');
+    const side = index % 2 === 0 ? 'left' : 'right';
+    const topPosition = 20 + index * 50;
+    
+    container.className = `attached-event ${side}`;
+    container.style.top = `${topPosition}px`;
+    
+    container.innerHTML = `
+        <div class="attached-event-card" draggable="true" data-event-id="${event.id}">
+            <div class="attached-event-content">
+                <div>
+                    <div class="attached-event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                        ${event.character}
                     </div>
-                    <div class="event-action-buttons">
-                        <button class="action-btn edit-event" data-event-id="${event.id}">
-                            <i data-lucide="edit" style="width: 10px; height: 10px;"></i>
-                        </button>
-                        <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                            <i data-lucide="trash-2" style="width: 10px; height: 10px;"></i>
-                        </button>
-                    </div>
+                    <div class="attached-event-title">${event.title}</div>
+                </div>
+                <div class="event-action-buttons">
+                    <button class="action-btn edit-event" data-event-id="${event.id}">
+                        <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                    </button>
+                    <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                        <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                    </button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
-        this.setupAttachedEventListeners(container, event);
-        return container;
-    }
+    this.setupAttachedEventListeners(container, event);
+    return container;
+}
 
     // 유틸리티 함수들
     getHierarchicalTimeNodes() {
