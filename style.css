@@ -417,11 +417,11 @@ body {
 }
 
 /* 붙은 이벤트 */
-/* 기존의 .attached-event 관련 모든 스타일을 다음으로 교체 */
 .attached-event {
     position: absolute;
     width: 50%;
     z-index: 15;
+    top: 0; /* 시간 노드와 같은 높이로 수평 배치 */
 }
 
 .attached-event.left {
@@ -429,6 +429,7 @@ body {
     padding-right: 2rem;
     display: flex;
     justify-content: flex-end;
+    align-items: center; /* 수직 중앙 정렬 추가 */
 }
 
 .attached-event.right {
@@ -436,6 +437,7 @@ body {
     padding-left: 2rem;
     display: flex;
     justify-content: flex-start;
+    align-items: center; /* 수직 중앙 정렬 추가 */
 }
 
 .attached-event-card {
@@ -463,7 +465,8 @@ body {
 .attached-event-card::before {
     content: '';
     position: absolute;
-    top: 1.5rem;
+    top: 50%; /* 카드 중앙에서 연결선 시작 */
+    transform: translateY(-50%); /* 중앙 정렬 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
@@ -478,6 +481,7 @@ body {
     right: 100%;
 }
 
+/* 나머지 attached-event 관련 스타일은 동일 */
 .attached-event-content {
     display: flex;
     justify-content: space-between;
@@ -855,3 +859,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
