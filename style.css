@@ -130,11 +130,11 @@ body {
 .attached-event-card::before {
     content: '';
     position: absolute;
-    top: 1.5rem; /* 카드 중앙 */
+    top: 16px; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 2; /* 타임라인보다 위, 카드보다 아래 */
+    z-index: 1; /* 시간 박스 아래에 위치 */
 }
 
 /* 모든 카드들 */
@@ -813,6 +813,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
