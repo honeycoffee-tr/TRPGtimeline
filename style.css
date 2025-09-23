@@ -237,6 +237,11 @@ body {
     justify-content: flex-start;
 }
 
+/* 오른쪽 정렬 문제 해결을 위한 추가 스타일 */
+.main-event-wrapper.position-right .main-event-side.right {
+    margin-left: auto;
+}
+
 .main-event-card {
     background: white;
     border-radius: 0.5rem;
