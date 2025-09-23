@@ -177,9 +177,10 @@ class TRPGTimeline {
     const attachedContainer = document.createElement('div');
     attachedContainer.className = 'attached-events-container';
     
+    // 붙은 이벤트들 - 기존 방식대로 복원
     attachedEvents.forEach((event, eventIndex) => {
         const attachedEvent = this.createAttachedEventElement(event, eventIndex);
-        attachedContainer.appendChild(attachedEvent);
+        container.appendChild(attachedEvent);
     });
     
     container.appendChild(attachedContainer);
@@ -356,6 +357,7 @@ class TRPGTimeline {
 
     createAttachedEventElement(event, index) {
     const container = document.createElement('div');
+    
     // 원래 사건의 위치를 기반으로 결정
     let side;
     if (event.position === 'left') {
@@ -363,10 +365,83 @@ class TRPGTimeline {
     } else if (event.position === 'right') {
         side = 'right';
     } else {
-        // position이 'auto'인 경우, 원래 위치 계산 로직 사용
         const originalPosition = this.getEventPosition(event, event.timeNodeId);
         side = originalPosition;
     }
+    
+    container.className = `attached-event ${side}`;
+    
+    // 메인 이벤트와 완전히 동일한 HTML 구조 사용
+    if (side === 'left') {
+        container.innerHTML = `
+            <div class="main-event-wrapper position-left">
+                <div class="main-event-side left">
+                    <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                        <div class="main-event-header" data-event-id="${event.id}">
+                            <div class="main-event-meta">
+                                <div>
+                                    <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                        ${event.character}
+                                    </div>
+                                    <div class="event-title">${event.title}</div>
+                                </div>
+                                <div class="event-actions">
+                                    <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                    <div class="event-action-buttons">
+                                        <button class="action-btn edit-event" data-event-id="${event.id}">
+                                            <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                        <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                    </div>
+                </div>
+                <div class="main-event-side right"></div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="main-event-wrapper position-right">
+                <div class="main-event-side left"></div>
+                <div class="main-event-side right">
+                    <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                        <div class="main-event-header" data-event-id="${event.id}">
+                            <div class="main-event-meta">
+                                <div>
+                                    <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                        ${event.character}
+                                    </div>
+                                    <div class="event-title">${event.title}</div>
+                                </div>
+                                <div class="event-actions">
+                                    <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                    <div class="event-action-buttons">
+                                        <button class="action-btn edit-event" data-event-id="${event.id}">
+                                            <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                        <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 메인 이벤트와 동일한 이벤트 리스너 사용
+    this.setupMainEventListeners(container, event);
+    return container;
+}
     
     container.className = `attached-event ${side}`;
     container.style.top = '0px';
@@ -1256,6 +1331,7 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
 
 
