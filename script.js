@@ -169,16 +169,22 @@ class TRPGTimeline {
             container.appendChild(dropZone);
         }
 
-        // 붙은 이벤트들
+        // 붙은 이벤트들을 시간 노드 앞에 배치하여 확장 시 공간 확보
         attachedEvents.forEach((event, eventIndex) => {
             const attachedEvent = this.createAttachedEventElement(event, eventIndex);
             container.appendChild(attachedEvent);
         });
-            
+        
         // 시간 노드
         const timeNodeDiv = this.createTimeNode(timeNode);
         container.appendChild(timeNodeDiv);
-
+        
+        // 확장된 attached event가 있으면 추가 여백
+        const hasExpandedAttached = attachedEvents.some(e => e.expanded);
+        if (hasExpandedAttached) {
+            container.style.marginBottom = '4rem'; // 확장된 경우 더 큰 여백
+        }
+        
         // 이벤트 영역
         const eventsContainer = document.createElement('div');
         eventsContainer.className = 'events-container';
@@ -761,15 +767,23 @@ class TRPGTimeline {
 
     // 이벤트 관리 함수들
     toggleEventExpansion(eventId) {
-        this.events = this.events.map(event => 
-            event.id === eventId 
-                ? { ...event, expanded: !event.expanded }
-                : event
-        );
-        
-        this.renderTimeline();
-        lucide.createIcons();
-    }
+    this.events = this.events.map(event => 
+        event.id === eventId 
+            ? { ...event, expanded: !event.expanded }
+            : event
+    );
+    
+    this.renderTimeline();
+    lucide.createIcons();
+    
+    // 확장 후 스크롤 조정 (선택사항)
+    setTimeout(() => {
+        const expandedElement = document.querySelector(`[data-event-id="${eventId}"]`);
+        if (expandedElement) {
+            expandedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, 100);
+}
 
     deleteEvent(eventId) {
         this.events = this.events.filter(event => event.id !== eventId);
@@ -1239,3 +1253,4 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
