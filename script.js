@@ -242,6 +242,7 @@ class TRPGTimeline {
                 <div class="main-event ${position}">
                     <div class="event-content">
                         <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                            <div class="connection-line"></div>
                             <div class="main-event-header" data-event-id="${event.id}">
                                 <div class="main-event-meta">
                                     <div>
@@ -534,7 +535,7 @@ class TRPGTimeline {
         
         const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNodeId && e.type === 'main' && e.position === 'auto');
         const eventIndex = timeNodeEvents.findIndex(e => e.id === event.id);
-        return eventIndex % 2 === 0 ? 'right' : 'left';
+        return eventIndex % 2 === 0 ? 'left' : 'right'; // 0번째는 왼쪽, 1번째는 오른쪽
     }
 
     getCharacterColor(characterName) {
