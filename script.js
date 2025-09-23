@@ -351,7 +351,7 @@ class TRPGTimeline {
 
     createAttachedEventElement(event, index) {
     const container = document.createElement('div');
-    // 원래 사건의 위치를 기반으로 결정 (index 대신 event.position 사용)
+    // 원래 사건의 위치를 기반으로 결정
     let side;
     if (event.position === 'left') {
         side = 'left';
@@ -364,27 +364,33 @@ class TRPGTimeline {
     }
     
     container.className = `attached-event ${side}`;
-    // 수평 배치를 위해 top 위치를 0으로 설정
     container.style.top = '0px';
     
+    // 메인 이벤트와 동일한 구조로 변경 (확장/축소 기능 포함)
     container.innerHTML = `
         <div class="attached-event-card" draggable="true" data-event-id="${event.id}">
-            <div class="attached-event-content">
-                <div>
-                    <div class="attached-event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                        ${event.character}
+            <div class="attached-event-header" data-event-id="${event.id}">
+                <div class="attached-event-meta">
+                    <div>
+                        <div class="attached-event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                            ${event.character}
+                        </div>
+                        <div class="attached-event-title">${event.title}</div>
                     </div>
-                    <div class="attached-event-title">${event.title}</div>
-                </div>
-                <div class="event-action-buttons">
-                    <button class="action-btn edit-event" data-event-id="${event.id}">
-                        <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                    </button>
-                    <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                        <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                    </button>
+                    <div class="event-actions">
+                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                        <div class="event-action-buttons">
+                            <button class="action-btn edit-event" data-event-id="${event.id}">
+                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                            </button>
+                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            ${event.expanded ? `<div class="attached-event-content-detail">${event.content || '내용이 없습니다.'}</div>` : ''}
         </div>
     `;
 
@@ -593,32 +599,41 @@ class TRPGTimeline {
     }
 
     setupAttachedEventListeners(container, event) {
-        const card = container.querySelector('.attached-event-card');
+    const card = container.querySelector('.attached-event-card');
+    const header = container.querySelector('.attached-event-header');
 
-        // 드래그
-        card.addEventListener('dragstart', (e) => {
-            e.stopPropagation();
-            this.draggedEvent = event;
-            card.classList.add('dragging');
-        });
+    // 드래그
+    card.addEventListener('dragstart', (e) => {
+        e.stopPropagation();
+        this.draggedEvent = event;
+        card.classList.add('dragging');
+    });
 
-        card.addEventListener('dragend', () => {
-            card.classList.remove('dragging');
-            this.draggedEvent = null;
-        });
+    card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        this.draggedEvent = null;
+    });
 
-        // 수정/삭제 버튼
-        container.querySelector('.edit-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.editEvent(event);
-        });
-
-        container.querySelector('.delete-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteEvent(event.id);
+    // 확장/축소 - 헤더 클릭 시
+    if (header) {
+        header.addEventListener('click', (e) => {
+            if (!this.draggedEvent) {
+                this.toggleEventExpansion(event.id);
+            }
         });
     }
 
+    // 수정/삭제 버튼
+    container.querySelector('.edit-event').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.editEvent(event);
+    });
+
+    container.querySelector('.delete-event').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteEvent(event.id);
+    });
+}
     // 드래그 앤 드롭 핸들러들
     handleEventDrop(targetTimeNodeId, targetOrder = null) {
         if (!this.draggedEvent) return;
@@ -1221,4 +1236,5 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
