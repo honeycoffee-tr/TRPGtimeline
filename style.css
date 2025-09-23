@@ -146,6 +146,7 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--primary-color);
     transition: all 0.2s;
+    display: none; /* 이 줄 추가 */
 }
 
 .time-node-circle.small { width: 12px; height: 12px; }
@@ -416,23 +417,42 @@ body {
 }
 
 /* 붙은 이벤트 */
+/* 기존의 .attached-event 관련 모든 스타일을 다음으로 교체 */
 .attached-event {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    width: 50%;
     z-index: 15;
-    width: 12.5rem;
+}
+
+.attached-event.left {
+    left: 0;
+    padding-right: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.attached-event.right {
+    right: 0;
+    padding-left: 2rem;
+    display: flex;
+    justify-content: flex-start;
 }
 
 .attached-event-card {
-    background: #FEF3C7;
-    border: 2px solid #F59E0B;
+    background: white;
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: move;
     transition: all 0.2s;
     position: relative;
+    max-width: 18rem;
+    min-width: 14rem;
+}
+
+.attached-event-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .attached-event-card.dragging {
@@ -443,45 +463,59 @@ body {
 .attached-event-card::before {
     content: '';
     position: absolute;
-    top: 0.75rem;
+    top: 1.5rem;
     height: 2px;
-    width: 1.25rem;
-    background-color: var(--primary-color);
+    width: 2rem;
+    background-color: var(--timeline-color);
     z-index: 10;
 }
 
-.attached-event.left {
-    margin-left: 1.25rem;
-}
-
-.attached-event.right {
-    margin-left: -13.75rem;
-}
-
 .attached-event.left .attached-event-card::before {
-    right: 100%;
+    left: 100%;
 }
 
 .attached-event.right .attached-event-card::before {
-    left: 100%;
+    right: 100%;
 }
 
 .attached-event-content {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 0.5rem;
+}
+
+.attached-event-content > div:first-child {
+    flex: 1;
+}
+
+.attached-event-content .event-action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.attached-event-card:hover .event-action-buttons {
+    opacity: 1;
 }
 
 .attached-event-character {
     font-size: 0.75rem;
-    color: #92400E;
+    color: white;
     font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--accent-color);
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
 }
 
 .attached-event-title {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #78350F;
+    color: var(--primary-color);
+    line-height: 1.4;
 }
 
 /* 공통 액션 버튼 */
