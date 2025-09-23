@@ -156,59 +156,64 @@ class TRPGTimeline {
     }
 
     createTimeNodeElement(timeNode, index, totalNodes) {
-        const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNode.id && !e.attachedToTimeNode);
-        const attachedEvents = this.events.filter(e => e.timeNodeId === timeNode.id && e.attachedToTimeNode);
+    const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNode.id && !e.attachedToTimeNode);
+    const attachedEvents = this.events.filter(e => e.timeNodeId === timeNode.id && e.attachedToTimeNode);
 
-        const container = document.createElement('div');
-        container.className = 'time-node-container';
-        container.style.marginLeft = `${timeNode.depth * 2}rem`;
+    const container = document.createElement('div');
+    container.className = 'time-node-container';
+    container.style.marginLeft = `${timeNode.depth * 2}rem`;
 
-        // 드롭 존 (위)
-        if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index > 0) {
-            const dropZone = this.createDropZone('time', timeNode, 'before');
-            container.appendChild(dropZone);
-        }
-
-        // 시간 노드
-        const timeNodeDiv = this.createTimeNode(timeNode);
-        container.appendChild(timeNodeDiv);
-
-        // 붙은 이벤트들
-        attachedEvents.forEach((event, eventIndex) => {
-            const attachedEvent = this.createAttachedEventElement(event, eventIndex);
-            container.appendChild(attachedEvent);
-        });
-
-        // 이벤트 영역
-        const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'events-container';
-        this.setupDropZone(eventsContainer, timeNode.id);
-
-        timeNodeEvents.sort((a, b) => a.order - b.order).forEach((event, eventIndex) => {
-            // 이벤트 위 드롭존
-            if (eventIndex === 0) {
-                const dropZone = this.createDropZone('event', event, 'before');
-                eventsContainer.appendChild(dropZone);
-            }
-
-            const eventElement = this.createEventElement(event, timeNode.id);
-            eventsContainer.appendChild(eventElement);
-
-            // 이벤트 아래 드롭존
-            const dropZone = this.createDropZone('event', event, 'after');
-            eventsContainer.appendChild(dropZone);
-        });
-
-        container.appendChild(eventsContainer);
-
-        // 드롭 존 (아래)
-        if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index === totalNodes - 1) {
-            const dropZone = this.createDropZone('time', timeNode, 'after');
-            container.appendChild(dropZone);
-        }
-
-        return container;
+    // 드롭 존 (위)
+    if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index > 0) {
+        const dropZone = this.createDropZone('time', timeNode, 'before');
+        container.appendChild(dropZone);
     }
+
+    // 시간 노드
+    const timeNodeDiv = this.createTimeNode(timeNode);
+    container.appendChild(timeNodeDiv);
+
+    // 붙은 이벤트들 - 확장 가능한 컨테이너로 변경
+    const attachedContainer = document.createElement('div');
+    attachedContainer.className = 'attached-events-container';
+    
+    attachedEvents.forEach((event, eventIndex) => {
+        const attachedEvent = this.createAttachedEventElement(event, eventIndex);
+        attachedContainer.appendChild(attachedEvent);
+    });
+    
+    container.appendChild(attachedContainer);
+
+    // 이벤트 영역
+    const eventsContainer = document.createElement('div');
+    eventsContainer.className = 'events-container';
+    this.setupDropZone(eventsContainer, timeNode.id);
+
+    timeNodeEvents.sort((a, b) => a.order - b.order).forEach((event, eventIndex) => {
+        // 이벤트 위 드롭존
+        if (eventIndex === 0) {
+            const dropZone = this.createDropZone('event', event, 'before');
+            eventsContainer.appendChild(dropZone);
+        }
+
+        const eventElement = this.createEventElement(event, timeNode.id);
+        eventsContainer.appendChild(eventElement);
+
+        // 이벤트 아래 드롭존
+        const dropZone = this.createDropZone('event', event, 'after');
+        eventsContainer.appendChild(dropZone);
+    });
+
+    container.appendChild(eventsContainer);
+
+    // 드롭 존 (아래)
+    if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index === totalNodes - 1) {
+        const dropZone = this.createDropZone('time', timeNode, 'after');
+        container.appendChild(dropZone);
+    }
+
+    return container;
+}
 
     createTimeNode(timeNode) {
         const nodeStyle = this.getTimeNodeStyle(timeNode.size || 'small');
@@ -1236,5 +1241,6 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
 
