@@ -187,7 +187,7 @@ body {
 .time-node-circle.large { width: 16px; height: 16px; }
 
 .time-node-label {
-    position: absolute;
+    position: relative; /* z-index 적용을 위해 필요 */
     left: 50%;
     transform: translateX(-50%) translateY(-2px);
     background-color: var(--primary-color);
@@ -196,7 +196,7 @@ body {
     white-space: nowrap;
     cursor: move;
     transition: all 0.2s;
-    z-index: 20;
+    z-index: 20; /* 연결선보다 위 */
 }
 
 .time-node-label:hover {
@@ -455,7 +455,16 @@ body {
     position: absolute;
     width: 100%;
     z-index: 15;
-    top: -20px; /* 시간 레이블과 수평 맞춤 */
+    top: -16px; /* 연결선과 시간 박스 중앙이 맞도록 조정 */
+}
+
+/* attached event가 확장될 때 공간 확보 */
+.attached-event .event-content {
+    position: relative;
+    z-index: 16; /* 다른 요소보다 위에 */
+    background-color: #F9FAFB;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem; /* 아래 요소와 간격 확보 */
 }
 
 /* attached event는 항상 absolute positioning으로 다른 요소에 영향 안 줌 */
@@ -469,9 +478,13 @@ body {
     pointer-events: auto; /* 카드만 클릭 가능 */
 }
 
-/* 연결선을 시간 레이블 중앙 높이로 조정 */
+/* 연결선을 시간 레이블 정확한 중앙에 맞춤 */
 .attached-event .main-event-card::before {
-    top: 20px; /* 시간 레이블 중앙 높이에 맞춤 */
+    top: 16px; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
+    height: 2px;
+    width: 2rem;
+    background-color: var(--timeline-color);
+    z-index: 1;
 }
 
 /* 공통 액션 버튼 */
@@ -811,6 +824,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
