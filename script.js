@@ -156,59 +156,59 @@ class TRPGTimeline {
     }
 
     createTimeNodeElement(timeNode, index, totalNodes) {
-    const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNode.id && !e.attachedToTimeNode);
-    const attachedEvents = this.events.filter(e => e.timeNodeId === timeNode.id && e.attachedToTimeNode);
+        const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNode.id && !e.attachedToTimeNode);
+        const attachedEvents = this.events.filter(e => e.timeNodeId === timeNode.id && e.attachedToTimeNode);
 
-    const container = document.createElement('div');
-    container.className = 'time-node-container';
-    container.style.marginLeft = `${timeNode.depth * 2}rem`;
+        const container = document.createElement('div');
+        container.className = 'time-node-container';
+        container.style.marginLeft = `${timeNode.depth * 2}rem`;
 
-    // 드롭 존 (위)
-    if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index > 0) {
-        const dropZone = this.createDropZone('time', timeNode, 'before');
-        container.appendChild(dropZone);
-    }
-
-    // 붙은 이벤트들
-    attachedEvents.forEach((event, eventIndex) => {
-        const attachedEvent = this.createAttachedEventElement(event, eventIndex);
-        container.appendChild(attachedEvent);
-    });
-        
-    // 시간 노드
-    const timeNodeDiv = this.createTimeNode(timeNode);
-    container.appendChild(timeNodeDiv);
-
-    // 이벤트 영역
-    const eventsContainer = document.createElement('div');
-    eventsContainer.className = 'events-container';
-    this.setupDropZone(eventsContainer, timeNode.id);
-
-    timeNodeEvents.sort((a, b) => a.order - b.order).forEach((event, eventIndex) => {
-        // 이벤트 위 드롭존
-        if (eventIndex === 0) {
-            const dropZone = this.createDropZone('event', event, 'before');
-            eventsContainer.appendChild(dropZone);
+        // 드롭 존 (위)
+        if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index > 0) {
+            const dropZone = this.createDropZone('time', timeNode, 'before');
+            container.appendChild(dropZone);
         }
 
-        const eventElement = this.createEventElement(event, timeNode.id);
-        eventsContainer.appendChild(eventElement);
+        // 붙은 이벤트들
+        attachedEvents.forEach((event, eventIndex) => {
+            const attachedEvent = this.createAttachedEventElement(event, eventIndex);
+            container.appendChild(attachedEvent);
+        });
+            
+        // 시간 노드
+        const timeNodeDiv = this.createTimeNode(timeNode);
+        container.appendChild(timeNodeDiv);
 
-        // 이벤트 아래 드롭존
-        const dropZone = this.createDropZone('event', event, 'after');
-        eventsContainer.appendChild(dropZone);
-    });
+        // 이벤트 영역
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'events-container';
+        this.setupDropZone(eventsContainer, timeNode.id);
 
-    container.appendChild(eventsContainer);
+        timeNodeEvents.sort((a, b) => a.order - b.order).forEach((event, eventIndex) => {
+            // 이벤트 위 드롭존
+            if (eventIndex === 0) {
+                const dropZone = this.createDropZone('event', event, 'before');
+                eventsContainer.appendChild(dropZone);
+            }
 
-    // 드롭 존 (아래)
-    if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index === totalNodes - 1) {
-        const dropZone = this.createDropZone('time', timeNode, 'after');
-        container.appendChild(dropZone);
+            const eventElement = this.createEventElement(event, timeNode.id);
+            eventsContainer.appendChild(eventElement);
+
+            // 이벤트 아래 드롭존
+            const dropZone = this.createDropZone('event', event, 'after');
+            eventsContainer.appendChild(dropZone);
+        });
+
+        container.appendChild(eventsContainer);
+
+        // 드롭 존 (아래)
+        if ((timeNode.timeType === 'time' || timeNode.timeType === 'etc') && index === totalNodes - 1) {
+            const dropZone = this.createDropZone('time', timeNode, 'after');
+            container.appendChild(dropZone);
+        }
+
+        return container;
     }
-
-    return container;
-}
 
     createTimeNode(timeNode) {
         const nodeStyle = this.getTimeNodeStyle(timeNode.size || 'small');
@@ -350,127 +350,92 @@ class TRPGTimeline {
     }
 
     createAttachedEventElement(event, index) {
-    const container = document.createElement('div');
-    
-    // 원래 사건의 위치를 기반으로 결정
-    let side;
-    if (event.position === 'left') {
-        side = 'left';
-    } else if (event.position === 'right') {
-        side = 'right';
-    } else {
-        const originalPosition = this.getEventPosition(event, event.timeNodeId);
-        side = originalPosition;
-    }
-    
-    container.className = `attached-event ${side}`;
-    
-    // 메인 이벤트와 완전히 동일한 HTML 구조 사용
-    if (side === 'left') {
-        container.innerHTML = `
-            <div class="main-event-wrapper position-left">
-                <div class="main-event-side left">
-                    <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                        <div class="main-event-header" data-event-id="${event.id}">
-                            <div class="main-event-meta">
-                                <div>
-                                    <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                        ${event.character}
+        const container = document.createElement('div');
+        
+        // 원래 사건의 위치를 기반으로 결정
+        let side;
+        if (event.position === 'left') {
+            side = 'left';
+        } else if (event.position === 'right') {
+            side = 'right';
+        } else {
+            const originalPosition = this.getEventPosition(event, event.timeNodeId);
+            side = originalPosition;
+        }
+        
+        container.className = `attached-event ${side}`;
+        
+        // 메인 이벤트와 완전히 동일한 HTML 구조 사용
+        if (side === 'left') {
+            container.innerHTML = `
+                <div class="main-event-wrapper position-left">
+                    <div class="main-event-side left">
+                        <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                            <div class="main-event-header" data-event-id="${event.id}">
+                                <div class="main-event-meta">
+                                    <div>
+                                        <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                            ${event.character}
+                                        </div>
+                                        <div class="event-title">${event.title}</div>
                                     </div>
-                                    <div class="event-title">${event.title}</div>
-                                </div>
-                                <div class="event-actions">
-                                    <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                    <div class="event-action-buttons">
-                                        <button class="action-btn edit-event" data-event-id="${event.id}">
-                                            <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                        </button>
-                                        <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
-                    </div>
-                </div>
-                <div class="main-event-side right"></div>
-            </div>
-        `;
-    } else {
-        container.innerHTML = `
-            <div class="main-event-wrapper position-right">
-                <div class="main-event-side left"></div>
-                <div class="main-event-side right">
-                    <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                        <div class="main-event-header" data-event-id="${event.id}">
-                            <div class="main-event-meta">
-                                <div>
-                                    <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                        ${event.character}
-                                    </div>
-                                    <div class="event-title">${event.title}</div>
-                                </div>
-                                <div class="event-actions">
-                                    <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                    <div class="event-action-buttons">
-                                        <button class="action-btn edit-event" data-event-id="${event.id}">
-                                            <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                        </button>
-                                        <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                            <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                        </button>
+                                    <div class="event-actions">
+                                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                        <div class="event-action-buttons">
+                                            <button class="action-btn edit-event" data-event-id="${event.id}">
+                                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                            </button>
+                                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
                         </div>
-                        ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                    </div>
+                    <div class="main-event-side right"></div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="main-event-wrapper position-right">
+                    <div class="main-event-side left"></div>
+                    <div class="main-event-side right">
+                        <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                            <div class="main-event-header" data-event-id="${event.id}">
+                                <div class="main-event-meta">
+                                    <div>
+                                        <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                            ${event.character}
+                                        </div>
+                                        <div class="event-title">${event.title}</div>
+                                    </div>
+                                    <div class="event-actions">
+                                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                        <div class="event-action-buttons">
+                                            <button class="action-btn edit-event" data-event-id="${event.id}">
+                                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                            </button>
+                                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
+
+        // 메인 이벤트와 동일한 이벤트 리스너 사용
+        this.setupMainEventListeners(container, event);
+        return container;
     }
-
-    // 메인 이벤트와 동일한 이벤트 리스너 사용
-    this.setupMainEventListeners(container, event);
-    return container;
-}
-    
-    container.className = `attached-event ${side}`;
-    container.style.top = '0px';
-    
-    // 메인 이벤트와 동일한 구조로 변경 (확장/축소 기능 포함)
-    container.innerHTML = `
-        <div class="attached-event-card" draggable="true" data-event-id="${event.id}">
-            <div class="attached-event-header" data-event-id="${event.id}">
-                <div class="attached-event-meta">
-                    <div>
-                        <div class="attached-event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                            ${event.character}
-                        </div>
-                        <div class="attached-event-title">${event.title}</div>
-                    </div>
-                    <div class="event-actions">
-                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                        <div class="event-action-buttons">
-                            <button class="action-btn edit-event" data-event-id="${event.id}">
-                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                            </button>
-                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            ${event.expanded ? `<div class="attached-event-content-detail">${event.content || '내용이 없습니다.'}</div>` : ''}
-        </div>
-    `;
-
-    this.setupAttachedEventListeners(container, event);
-    return container;
-}
 
     // 유틸리티 함수들
     getHierarchicalTimeNodes() {
@@ -489,7 +454,6 @@ class TRPGTimeline {
         return result;
     }
 
-    // React 코드와 동일하게 수정: 0번째는 right, 1번째는 left
     getEventPosition(event, timeNodeId) {
         if (event.position !== 'auto') return event.position;
         if (event.type !== 'main') return 'center';
@@ -672,7 +636,6 @@ class TRPGTimeline {
         });
     }
 
-    
     // 드래그 앤 드롭 핸들러들
     handleEventDrop(targetTimeNodeId, targetOrder = null) {
         if (!this.draggedEvent) return;
@@ -798,32 +761,15 @@ class TRPGTimeline {
 
     // 이벤트 관리 함수들
     toggleEventExpansion(eventId) {
-    this.events = this.events.map(event => 
-        event.id === eventId 
-            ? { ...event, expanded: !event.expanded }
-            : event
-    );
-    
-    this.renderTimeline();
-    lucide.createIcons();
-}
-    // attached event 컨테이너 클래스 업데이트
-    setTimeout(() => {
-        const expandedAttachedEvents = document.querySelectorAll('.attached-event-content-detail');
-        const containers = document.querySelectorAll('.attached-events-container');
+        this.events = this.events.map(event => 
+            event.id === eventId 
+                ? { ...event, expanded: !event.expanded }
+                : event
+        );
         
-        containers.forEach(container => {
-            if (container.querySelector('.attached-event-content-detail')) {
-                container.classList.add('expanded');
-            } else {
-                container.classList.remove('expanded');
-            }
-        });
-    }, 0);
-    
-    this.renderTimeline();
-    lucide.createIcons();
-}
+        this.renderTimeline();
+        lucide.createIcons();
+    }
 
     deleteEvent(eventId) {
         this.events = this.events.filter(event => event.id !== eventId);
@@ -853,7 +799,7 @@ class TRPGTimeline {
         this.openTimeModal();
     }
 
-    // 모달 관리 함수들 (이전과 동일하게 유지)
+    // 모달 관리 함수들
     openScenarioModal() {
         document.getElementById('modal-scenario-title').value = this.scenario.title;
         document.getElementById('modal-scenario-overview').value = this.scenario.overview;
@@ -904,7 +850,7 @@ class TRPGTimeline {
         }
     }
 
-    // 나머지 함수들 (모달, 폼 처리 등)은 이전 코드와 동일하게 유지
+    // 폼 관련 함수들
     populateTimeModal(timeNode) {
         document.getElementById('time-type').value = timeNode.timeType;
         document.getElementById('parent-time').value = timeNode.parentTimeNodeId || '';
@@ -1293,10 +1239,3 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
-
-
-
-
-
-
-
