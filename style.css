@@ -291,11 +291,11 @@ body {
 .main-event-card::before {
     content: '';
     position: absolute;
-    top: 16px;    /* ← 1.5rem에서 16px로 변경 */
+    top: 1rem;    /* ← 1.5rem에서 16px로 변경 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 2;   /* ← z-index: 5에서 z-index: 2로 변경 */
+    z-index: 0;   /* ← z-index: 5에서 z-index: 2로 변경 */
 }
 
 .main-event-side.left .main-event-card::before {
@@ -441,7 +441,7 @@ body {
 /* 붙은 이벤트 */
 /* ë¶™ì€ ì´ë²¤íŠ¸ - 메인 이벤트와 동일한 구조 사용 */
 .attached-event {
-    position: absolute;
+    position: relative;
     width: 100%;
     z-index: 15;
     top: -16px; /* 연결선과 시간 박스 중앙이 맞도록 조정 */
@@ -469,11 +469,11 @@ body {
 
 /* 연결선을 시간 레이블 정확한 중앙에 맞춤 */
 .attached-event .main-event-card::before {
-    top: 16px; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
+    top: 1rem; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 1;
+    z-index: 0;
 }
 
 /* 공통 액션 버튼 */
@@ -813,6 +813,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
