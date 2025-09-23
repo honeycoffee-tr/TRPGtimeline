@@ -254,37 +254,71 @@ class TRPGTimeline {
         if (event.type === 'main') {
             const position = this.getEventPosition(event, timeNodeId);
             
-            container.innerHTML = `
-                <div class="main-event-wrapper position-${position}">
-                    <div class="main-event-side ${position}">
-                        <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                            <div class="main-event-header" data-event-id="${event.id}">
-                                <div class="main-event-meta">
-                                    <div>
-                                        <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                            ${event.character}
+            if (position === 'left') {
+                container.innerHTML = `
+                    <div class="main-event-wrapper position-left">
+                        <div class="main-event-side left">
+                            <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                                <div class="main-event-header" data-event-id="${event.id}">
+                                    <div class="main-event-meta">
+                                        <div>
+                                            <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                                ${event.character}
+                                            </div>
+                                            <div class="event-title">${event.title}</div>
                                         </div>
-                                        <div class="event-title">${event.title}</div>
-                                    </div>
-                                    <div class="event-actions">
-                                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                        <div class="event-action-buttons">
-                                            <button class="action-btn edit-event" data-event-id="${event.id}">
-                                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                            </button>
-                                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                            </button>
+                                        <div class="event-actions">
+                                            <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                            <div class="event-action-buttons">
+                                                <button class="action-btn edit-event" data-event-id="${event.id}">
+                                                    <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                                <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
                             </div>
-                            ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                        </div>
+                        <div class="main-event-side right"></div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="main-event-wrapper position-right">
+                        <div class="main-event-side left"></div>
+                        <div class="main-event-side right">
+                            <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                                <div class="main-event-header" data-event-id="${event.id}">
+                                    <div class="main-event-meta">
+                                        <div>
+                                            <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                                ${event.character}
+                                            </div>
+                                            <div class="event-title">${event.title}</div>
+                                        </div>
+                                        <div class="event-actions">
+                                            <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                                            <div class="event-action-buttons">
+                                                <button class="action-btn edit-event" data-event-id="${event.id}">
+                                                    <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                                <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+                            </div>
                         </div>
                     </div>
-                    ${position === 'left' ? '<div class="main-event-side right"></div>' : '<div class="main-event-side left"></div>'}
-                </div>
-            `;
+                `;
+            }
 
             // 메인 이벤트 이벤트 리스너
             this.setupMainEventListeners(container, event);
