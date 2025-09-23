@@ -351,11 +351,21 @@ class TRPGTimeline {
 
     createAttachedEventElement(event, index) {
     const container = document.createElement('div');
-    const side = index % 2 === 0 ? 'left' : 'right';
-    const topPosition = 20 + index * 50;
+    // 원래 사건의 위치를 기반으로 결정 (index 대신 event.position 사용)
+    let side;
+    if (event.position === 'left') {
+        side = 'left';
+    } else if (event.position === 'right') {
+        side = 'right';
+    } else {
+        // position이 'auto'인 경우, 원래 위치 계산 로직 사용
+        const originalPosition = this.getEventPosition(event, event.timeNodeId);
+        side = originalPosition;
+    }
     
     container.className = `attached-event ${side}`;
-    container.style.top = `${topPosition}px`;
+    // 수평 배치를 위해 top 위치를 0으로 설정
+    container.style.top = '0px';
     
     container.innerHTML = `
         <div class="attached-event-card" draggable="true" data-event-id="${event.id}">
@@ -1211,3 +1221,4 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
