@@ -1,4 +1,4 @@
-// TRPG Timeline Application
+// TRPG Timeline Application - 완전히 새로운 접근
 class TRPGTimeline {
     constructor() {
         this.scenario = {
@@ -80,6 +80,12 @@ class TRPGTimeline {
         document.getElementById('export-btn').addEventListener('click', () => this.exportData());
         document.getElementById('import-file').addEventListener('change', (e) => this.importData(e));
 
+        // 모달 관련 이벤트
+        this.setupModalEvents();
+        this.setupFormEvents();
+    }
+
+    setupModalEvents() {
         // 모달 닫기 버튼들
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -96,7 +102,9 @@ class TRPGTimeline {
                 }
             });
         });
+    }
 
+    setupFormEvents() {
         // 시나리오 모달 이벤트
         document.getElementById('add-character-btn').addEventListener('click', () => this.addCharacter());
         document.getElementById('modal-scenario-title').addEventListener('input', (e) => {
@@ -162,37 +170,7 @@ class TRPGTimeline {
         }
 
         // 시간 노드
-        const timeNodeDiv = document.createElement('div');
-        timeNodeDiv.className = 'time-node';
-
-        // 시간 노드 원
-        const circle = document.createElement('div');
-        circle.className = `time-node-circle ${timeNode.size || 'small'}`;
-        timeNodeDiv.appendChild(circle);
-
-        // 시간 라벨
-        const label = document.createElement('div');
-        label.className = `time-node-label ${timeNode.size || 'small'}`;
-        label.textContent = timeNode.timeValue;
-        label.draggable = true;
-
-        // 시간 노드 액션 버튼들
-        const actions = document.createElement('div');
-        actions.className = 'time-node-actions';
-        actions.innerHTML = `
-            <button class="action-btn edit-time" data-time-id="${timeNode.id}">
-                <i data-lucide="edit" style="width: 10px; height: 10px;"></i>
-            </button>
-            <button class="action-btn delete delete-time" data-time-id="${timeNode.id}">
-                <i data-lucide="trash-2" style="width: 10px; height: 10px;"></i>
-            </button>
-        `;
-        label.appendChild(actions);
-
-        // 시간 노드 이벤트 리스너
-        this.setupTimeNodeEventListeners(label, timeNode);
-
-        timeNodeDiv.appendChild(label);
+        const timeNodeDiv = this.createTimeNode(timeNode);
         container.appendChild(timeNodeDiv);
 
         // 붙은 이벤트들
@@ -232,17 +210,54 @@ class TRPGTimeline {
         return container;
     }
 
+    createTimeNode(timeNode) {
+        const nodeStyle = this.getTimeNodeStyle(timeNode.size || 'small');
+        
+        const timeNodeDiv = document.createElement('div');
+        timeNodeDiv.className = 'time-node';
+
+        // 시간 노드 원
+        const circle = document.createElement('div');
+        circle.className = `time-node-circle ${timeNode.size || 'small'}`;
+        timeNodeDiv.appendChild(circle);
+
+        // 시간 라벨
+        const label = document.createElement('div');
+        label.className = `time-node-label ${timeNode.size || 'small'}`;
+        label.textContent = timeNode.timeValue;
+        label.draggable = true;
+
+        // 시간 노드 액션 버튼들
+        const actions = document.createElement('div');
+        actions.className = 'time-node-actions';
+        actions.innerHTML = `
+            <button class="action-btn edit-time" data-time-id="${timeNode.id}">
+                <i data-lucide="edit" style="width: 10px; height: 10px;"></i>
+            </button>
+            <button class="action-btn delete delete-time" data-time-id="${timeNode.id}">
+                <i data-lucide="trash-2" style="width: 10px; height: 10px;"></i>
+            </button>
+        `;
+        label.appendChild(actions);
+
+        // 시간 노드 이벤트 리스너
+        this.setupTimeNodeEventListeners(label, timeNode);
+
+        timeNodeDiv.appendChild(label);
+        return timeNodeDiv;
+    }
+
     createEventElement(event, timeNodeId) {
         const container = document.createElement('div');
         container.className = 'event-item';
 
         if (event.type === 'main') {
             const position = this.getEventPosition(event, timeNodeId);
+            
             container.innerHTML = `
-                <div class="main-event ${position}">
-                    <div class="event-content">
+                <div class="main-event-wrapper position-${position}">
+                    <div class="main-event-side ${position}">
                         <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                            <div class="connection-line"></div>
                             <div class="main-event-header" data-event-id="${event.id}">
                                 <div class="main-event-meta">
                                     <div>
@@ -267,6 +282,7 @@ class TRPGTimeline {
                             ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
                         </div>
                     </div>
+                    ${position === 'left' ? '<div class="main-event-side right"></div>' : '<div class="main-event-side left"></div>'}
                 </div>
             `;
 
@@ -330,6 +346,51 @@ class TRPGTimeline {
         return container;
     }
 
+    // 유틸리티 함수들
+    getHierarchicalTimeNodes() {
+        const rootNodes = this.timeNodes.filter(node => !node.parentTimeNodeId).sort((a, b) => a.order - b.order);
+        const result = [];
+        
+        const addNodeAndChildren = (node, depth = 0) => {
+            result.push({ ...node, depth });
+            const children = this.timeNodes
+                .filter(child => child.parentTimeNodeId === node.id)
+                .sort((a, b) => a.order - b.order);
+            children.forEach(child => addNodeAndChildren(child, depth + 1));
+        };
+        
+        rootNodes.forEach(node => addNodeAndChildren(node));
+        return result;
+    }
+
+    // React 코드와 동일하게 수정: 0번째는 right, 1번째는 left
+    getEventPosition(event, timeNodeId) {
+        if (event.position !== 'auto') return event.position;
+        if (event.type !== 'main') return 'center';
+        
+        const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNodeId && e.type === 'main' && e.position === 'auto');
+        const eventIndex = timeNodeEvents.findIndex(e => e.id === event.id);
+        return eventIndex % 2 === 0 ? 'right' : 'left';
+    }
+
+    getCharacterColor(characterName) {
+        const character = this.scenario.characters.find(char => char.name === characterName);
+        return character ? character.color : '#374151';
+    }
+
+    getTimeNodeStyle(size) {
+        switch(size) {
+            case 'large':
+                return { node: 'w-4 h-4', label: 'px-4 py-2 text-sm font-semibold' };
+            case 'medium':
+                return { node: 'w-3.5 h-3.5', label: 'px-3 py-1.5 text-xs font-medium' };
+            case 'small':
+            default:
+                return { node: 'w-3 h-3', label: 'px-3 py-1 text-xs font-medium' };
+        }
+    }
+
+    // 드롭 존 및 이벤트 리스너 설정
     createDropZone(type, target, position) {
         const dropZone = document.createElement('div');
         dropZone.className = type === 'time' ? 'drop-zone' : 'drop-zone event-drop-zone';
@@ -512,37 +573,6 @@ class TRPGTimeline {
         });
     }
 
-    // 유틸리티 함수들
-    getHierarchicalTimeNodes() {
-        const rootNodes = this.timeNodes.filter(node => !node.parentTimeNodeId).sort((a, b) => a.order - b.order);
-        const result = [];
-        
-        const addNodeAndChildren = (node, depth = 0) => {
-            result.push({ ...node, depth });
-            const children = this.timeNodes
-                .filter(child => child.parentTimeNodeId === node.id)
-                .sort((a, b) => a.order - b.order);
-            children.forEach(child => addNodeAndChildren(child, depth + 1));
-        };
-        
-        rootNodes.forEach(node => addNodeAndChildren(node));
-        return result;
-    }
-
-    getEventPosition(event, timeNodeId) {
-        if (event.position !== 'auto') return event.position;
-        if (event.type !== 'main') return 'center';
-        
-        const timeNodeEvents = this.events.filter(e => e.timeNodeId === timeNodeId && e.type === 'main' && e.position === 'auto');
-        const eventIndex = timeNodeEvents.findIndex(e => e.id === event.id);
-        return eventIndex % 2 === 0 ? 'left' : 'right'; // 0번째는 왼쪽, 1번째는 오른쪽
-    }
-
-    getCharacterColor(characterName) {
-        const character = this.scenario.characters.find(char => char.name === characterName);
-        return character ? character.color : '#374151';
-    }
-
     // 드래그 앤 드롭 핸들러들
     handleEventDrop(targetTimeNodeId, targetOrder = null) {
         if (!this.draggedEvent) return;
@@ -705,7 +735,7 @@ class TRPGTimeline {
         this.openTimeModal();
     }
 
-    // 모달 관리 함수들
+    // 모달 관리 함수들 (이전과 동일하게 유지)
     openScenarioModal() {
         document.getElementById('modal-scenario-title').value = this.scenario.title;
         document.getElementById('modal-scenario-overview').value = this.scenario.overview;
@@ -756,6 +786,7 @@ class TRPGTimeline {
         }
     }
 
+    // 나머지 함수들 (모달, 폼 처리 등)은 이전 코드와 동일하게 유지
     populateTimeModal(timeNode) {
         document.getElementById('time-type').value = timeNode.timeType;
         document.getElementById('parent-time').value = timeNode.parentTimeNodeId || '';
