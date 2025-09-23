@@ -169,21 +169,15 @@ class TRPGTimeline {
         container.appendChild(dropZone);
     }
 
-    // 시간 노드
-    const timeNodeDiv = this.createTimeNode(timeNode);
-    container.appendChild(timeNodeDiv);
-
-    // 붙은 이벤트들 - 확장 가능한 컨테이너로 변경
-    const attachedContainer = document.createElement('div');
-    attachedContainer.className = 'attached-events-container';
-    
-    // 붙은 이벤트들 - 기존 방식대로 복원
+    // 붙은 이벤트들
     attachedEvents.forEach((event, eventIndex) => {
         const attachedEvent = this.createAttachedEventElement(event, eventIndex);
         container.appendChild(attachedEvent);
     });
-    
-    container.appendChild(attachedContainer);
+        
+    // 시간 노드
+    const timeNodeDiv = this.createTimeNode(timeNode);
+    container.appendChild(timeNodeDiv);
 
     // 이벤트 영역
     const eventsContainer = document.createElement('div');
@@ -845,6 +839,9 @@ class TRPGTimeline {
             : event
     );
     
+    this.renderTimeline();
+    lucide.createIcons();
+}
     // attached event 컨테이너 클래스 업데이트
     setTimeout(() => {
         const expandedAttachedEvents = document.querySelectorAll('.attached-event-content-detail');
@@ -1331,6 +1328,7 @@ class TRPGTimeline {
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
 });
+
 
 
 
