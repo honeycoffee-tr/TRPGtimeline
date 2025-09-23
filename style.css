@@ -126,17 +126,6 @@ body {
     z-index: 1; /* 가장 아래 */
 }
 
-/* 메인 이벤트 연결선 */
-.main-event-card::before {
-    content: '';
-    position: absolute;
-    top: 1.5rem;
-    height: 2px;
-    width: 2rem;
-    background-color: var(--timeline-color);
-    z-index: 2; /* 타임라인보다 위, 카드보다 아래 */
-}
-
 /* attached event 연결선 */
 .attached-event-card::before {
     content: '';
@@ -824,6 +813,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
