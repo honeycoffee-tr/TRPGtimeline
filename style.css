@@ -302,11 +302,11 @@ body {
 .main-event-card::before {
     content: '';
     position: absolute;
-    top: 1.5rem;
+    top: 16px;    /* ← 1.5rem에서 16px로 변경 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 5;
+    z-index: 2;   /* ← z-index: 5에서 z-index: 2로 변경 */
 }
 
 .main-event-side.left .main-event-card::before {
@@ -824,6 +824,7 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
 
 
