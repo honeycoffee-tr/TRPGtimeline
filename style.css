@@ -421,7 +421,7 @@ body {
     position: absolute;
     width: 50%;
     z-index: 15;
-    top: 0; /* 시간 노드와 같은 높이로 수평 배치 */
+    top: -10px; /* 시간 레이블과 수평이 되도록 위치 조정 */
 }
 
 .attached-event.left {
@@ -429,7 +429,7 @@ body {
     padding-right: 2rem;
     display: flex;
     justify-content: flex-end;
-    align-items: center; /* 수직 중앙 정렬 추가 */
+    align-items: center;
 }
 
 .attached-event.right {
@@ -437,7 +437,7 @@ body {
     padding-left: 2rem;
     display: flex;
     justify-content: flex-start;
-    align-items: center; /* 수직 중앙 정렬 추가 */
+    align-items: center;
 }
 
 .attached-event-card {
@@ -465,8 +465,7 @@ body {
 .attached-event-card::before {
     content: '';
     position: absolute;
-    top: 50%; /* 카드 중앙에서 연결선 시작 */
-    transform: translateY(-50%); /* 중앙 정렬 */
+    top: 1.5rem; /* 카드 중앙 높이로 조정 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
@@ -482,23 +481,33 @@ body {
 }
 
 /* 나머지 attached-event 관련 스타일은 동일 */
-.attached-event-content {
+.attached-event-header {
+    padding: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.attached-event-header:hover {
+    background-color: #F9FAFB;
+}
+
+.attached-event-meta {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.5rem;
 }
 
-.attached-event-content > div:first-child {
-    flex: 1;
+.attached-event-content-detail {
+    padding: 1rem;
+    border-top: 1px solid #F3F4F6;
+    background-color: #F9FAFB;
+    font-size: 0.875rem;
+    color: var(--text-gray-700);
+    white-space: pre-wrap;
+    line-height: 1.6;
 }
 
-.attached-event-content .event-action-buttons {
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
+/* 기존 attached-event-content 스타일은 삭제하고 위로 교체 */
 
 .attached-event-card:hover .event-action-buttons {
     opacity: 1;
@@ -859,4 +868,5 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
 
