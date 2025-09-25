@@ -9,6 +9,10 @@
     --primary-color: #1F2937;
     --secondary-color: #374151;
     --accent-color: #3B82F6;
+    --github-color: #24292F;
+    --success-color: #059669;
+    --warning-color: #D97706;
+    --error-color: #EF4444;
     --background-color: #F9FAFB;
     --timeline-color: #D1D5DB;
     --border-color: #E5E7EB;
@@ -79,10 +83,17 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
+    text-decoration: none;
 }
 
 .btn:hover {
     transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-primary {
@@ -90,7 +101,7 @@ body {
     color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background-color: #111827;
 }
 
@@ -100,8 +111,119 @@ body {
     border: 1px solid #D1D5DB;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
     background-color: #F9FAFB;
+}
+
+.btn-github {
+    background-color: var(--github-color);
+    color: white;
+}
+
+.btn-github:hover:not(:disabled) {
+    background-color: #1c2127;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #047857;
+}
+
+/* GitHub 관련 스타일 */
+.github-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.github-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.github-status.connected {
+    background-color: #ECFDF5;
+    color: var(--success-color);
+    border: 1px solid #A7F3D0;
+}
+
+.github-status.disconnected {
+    background-color: #FEF3C7;
+    color: var(--warning-color);
+    border: 1px solid #FDE68A;
+}
+
+.github-info {
+    margin-bottom: 1.5rem;
+}
+
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: #EBF8FF;
+    border: 1px solid #93C5FD;
+    border-radius: 0.375rem;
+    color: #1E40AF;
+    font-size: 0.875rem;
+}
+
+.info-box i {
+    color: #3B82F6;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.warning-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: #FEF3C7;
+    border: 1px solid #FDE68A;
+    border-radius: 0.375rem;
+    color: #92400E;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+}
+
+.warning-box i {
+    color: var(--warning-color);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.share-result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    border-radius: 0.375rem;
+}
+
+.share-result h4 {
+    color: var(--success-color);
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.url-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.url-input-group input {
+    flex: 1;
 }
 
 /* 타임라인 컨테이너 */
@@ -123,29 +245,29 @@ body {
     width: 2px;
     height: 100%;
     background-color: var(--timeline-color);
-    z-index: 1; /* 가장 아래 */
+    z-index: 1;
 }
 
 /* attached event 연결선 */
 .attached-event-card::before {
     content: '';
     position: absolute;
-    top: 16px; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
+    top: 16px;
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 1; /* 시간 박스 아래에 위치 */
+    z-index: 1;
 }
 
 /* 모든 카드들 */
 .main-event-card,
 .attached-event-card,
 .sub-event-card {
-    z-index: 10; /* 연결선보다 위 */
+    z-index: 10;
 }
 
 .time-node-label {
-    z-index: 20; /* 가장 위 */
+    z-index: 20;
 }
 
 /* 시간 노드 컨테이너 */
@@ -168,7 +290,7 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--primary-color);
     transition: all 0.2s;
-    display: none; /* 이 줄 추가 */
+    display: none;
 }
 
 .time-node-circle.small { width: 12px; height: 12px; }
@@ -176,7 +298,7 @@ body {
 .time-node-circle.large { width: 16px; height: 16px; }
 
 .time-node-label {
-    position: relative; /* z-index 적용을 위해 필요 */
+    position: relative;
     left: 50%;
     transform: translateX(-50%) translateY(-2px);
     background-color: var(--primary-color);
@@ -185,7 +307,7 @@ body {
     white-space: nowrap;
     cursor: move;
     transition: all 0.2s;
-    z-index: 20; /* 연결선보다 위 */
+    z-index: 20;
 }
 
 .time-node-label:hover {
@@ -291,11 +413,11 @@ body {
 .main-event-card::before {
     content: '';
     position: absolute;
-    top: 1rem;    /* ← 1.5rem에서 16px로 변경 */
+    top: 1rem;
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
-    z-index: 0;   /* ← z-index: 5에서 z-index: 2로 변경 */
+    z-index: 0;
 }
 
 .main-event-side.left .main-event-card::before {
@@ -377,7 +499,7 @@ body {
     display: flex;
     justify-content: center;
     position: relative;
-    z-index: 10; /* 중앙선보다 위에 표시 */
+    z-index: 10;
 }
 
 .sub-event-card {
@@ -439,37 +561,33 @@ body {
 }
 
 /* 붙은 이벤트 */
-/* ë¶™ì€ ì´ë²¤íŠ¸ - 메인 이벤트와 동일한 구조 사용 */
 .attached-event {
     position: relative;
     width: 100%;
     z-index: 15;
-    top: -16px; /* 연결선과 시간 박스 중앙이 맞도록 조정 */
+    top: -16px;
 }
 
-/* attached event가 확장될 때 공간 확보 */
 .attached-event .event-content {
     position: relative;
-    z-index: 16; /* 다른 요소보다 위에 */
+    z-index: 16;
     background-color: #F9FAFB;
     margin-top: 0.5rem;
-    margin-bottom: 1rem; /* 아래 요소와 간격 확보 */
+    margin-bottom: 1rem;
 }
 
-/* attached event는 항상 absolute positioning으로 다른 요소에 영향 안 줌 */
 .attached-event .main-event-wrapper {
     position: absolute;
     width: 100%;
-    pointer-events: none; /* 빈 공간 클릭 방지 */
+    pointer-events: none;
 }
 
 .attached-event .main-event-card {
-    pointer-events: auto; /* 카드만 클릭 가능 */
+    pointer-events: auto;
 }
 
-/* 연결선을 시간 레이블 정확한 중앙에 맞춤 */
 .attached-event .main-event-card::before {
-    top: 1rem; /* 시간 레이블 중앙 높이에 정확히 맞춤 */
+    top: 1rem;
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
@@ -492,7 +610,7 @@ body {
 }
 
 .action-btn.delete:hover {
-    color: #EF4444;
+    color: var(--error-color);
 }
 
 /* 드롭 존 스타일 */
@@ -606,12 +724,32 @@ body {
     height: 5rem;
 }
 
+.form-help {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-gray-400);
+    margin-top: 0.25rem;
+}
+
 .color-input {
     width: 3rem;
     height: 2.25rem;
     border: 1px solid #D1D5DB;
     border-radius: 0.375rem;
     cursor: pointer;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal !important;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }
 
 .time-inputs {
@@ -729,6 +867,11 @@ body {
     .header-buttons {
         justify-content: center;
     }
+
+    .github-buttons {
+        width: 100%;
+        justify-content: center;
+    }
     
     .timeline-container {
         padding: 1rem 0.5rem;
@@ -764,6 +907,14 @@ body {
     .time-node-container {
         margin-bottom: 2rem;
     }
+
+    .url-input-group {
+        flex-direction: column;
+    }
+
+    .url-input-group input {
+        margin-bottom: 0.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -777,6 +928,16 @@ body {
     
     .sub-event-card {
         max-width: 14rem;
+    }
+
+    .github-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .header-buttons {
+        flex-direction: column;
+        align-items: center;
     }
 }
 
@@ -813,13 +974,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
-
-
-
-
-
-
-
-
-
-
