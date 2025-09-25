@@ -16,10 +16,6 @@
                     <h1 id="scenario-title">TRPG 시나리오 타임라인</h1>
                     <p id="scenario-base-year" class="scenario-meta"></p>
                     <p id="scenario-overview" class="scenario-meta"></p>
-                    <!-- GitHub 상태 표시 -->
-                    <div id="github-status" class="github-status disconnected">
-                        <i data-lucide="alert-circle"></i>GitHub 미연결
-                    </div>
                 </div>
                 <div class="header-buttons">
                     <button id="scenario-btn" class="btn btn-secondary">
@@ -31,17 +27,6 @@
                     <button id="event-btn" class="btn btn-primary">
                         <i data-lucide="plus"></i>사건 추가
                     </button>
-                    
-                    <!-- GitHub 협업 버튼들 -->
-                    <div class="github-buttons">
-                        <button id="github-share-btn" class="btn btn-github">
-                            <i data-lucide="share-2"></i>GitHub 공유
-                        </button>
-                        <button id="github-load-btn" class="btn btn-github">
-                            <i data-lucide="download-cloud"></i>GitHub 불러오기
-                        </button>
-                    </div>
-                    
                     <button id="export-btn" class="btn btn-secondary">
                         <i data-lucide="download"></i>내보내기
                     </button>
@@ -200,108 +185,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- GitHub 공유 모달 -->
-        <div id="github-share-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>GitHub Gist로 공유</h2>
-                    <button class="modal-close" data-modal="github-share-modal">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="github-info">
-                        <div class="info-box">
-                            <i data-lucide="info"></i>
-                            <p>GitHub Gist를 통해 팀원들과 타임라인을 공유할 수 있습니다. 생성된 링크를 팀원들에게 전달하세요.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Gist 제목</label>
-                        <input type="text" id="gist-title" class="form-input" placeholder="현재 시나리오 제목이 사용됩니다">
-                    </div>
-                    <div class="form-group">
-                        <label>설명 (선택사항)</label>
-                        <textarea id="gist-description" class="form-textarea" placeholder="Gist에 대한 간단한 설명을 입력하세요"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="gist-public" checked>
-                            공개 Gist로 생성 (팀원들이 접근할 수 있도록 권장)
-                        </label>
-                    </div>
-                    
-                    <button id="share-to-gist-btn" class="btn btn-github">GitHub에 공유</button>
-                    
-                    <div id="share-result" class="share-result" style="display: none;">
-                        <h4>공유 완료!</h4>
-                        <div class="form-group">
-                            <label>Gist 링크 (팀원들과 공유)</label>
-                            <div class="url-input-group">
-                                <input type="text" id="gist-url" class="form-input" readonly>
-                                <button type="button" class="btn btn-secondary" onclick="app.copyToClipboard(document.getElementById('gist-url').value)">
-                                    <i data-lucide="copy"></i>복사
-                                </button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Raw 파일 링크</label>
-                            <div class="url-input-group">
-                                <input type="text" id="gist-raw-url" class="form-input" readonly>
-                                <button type="button" class="btn btn-secondary" onclick="app.copyToClipboard(document.getElementById('gist-raw-url').value)">
-                                    <i data-lucide="copy"></i>복사
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- GitHub 불러오기 모달 -->
-        <div id="github-load-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>GitHub Gist에서 불러오기</h2>
-                    <button class="modal-close" data-modal="github-load-modal">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="github-info">
-                        <div class="info-box">
-                            <i data-lucide="info"></i>
-                            <p>팀원이 공유한 GitHub Gist URL을 입력하여 타임라인을 불러올 수 있습니다.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>GitHub Gist URL</label>
-                        <input type="url" id="load-gist-url" class="form-input" placeholder="https://gist.github.com/...">
-                        <small class="form-help">Gist 링크 또는 Raw 파일 링크를 입력하세요</small>
-                    </div>
-                    
-                    <button id="load-from-gist-btn" class="btn btn-github">Gist에서 불러오기</button>
-                    
-                    <div class="warning-box">
-                        <i data-lucide="alert-triangle"></i>
-                        <p>불러오기를 실행하면 현재 작업 중인 타임라인이 교체됩니다. 필요한 경우 먼저 현재 작업을 저장해주세요.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
     <script src="script.js"></script>
-    <script>
-        // 전역에서 앱 인스턴스 접근 가능하도록
-        let app;
-        document.addEventListener('DOMContentLoaded', () => {
-            app = new TRPGTimeline();
-        });
-    </script>
 </body>
 </html>
