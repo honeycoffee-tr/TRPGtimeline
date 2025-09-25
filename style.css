@@ -9,7 +9,6 @@
     --primary-color: #1F2937;
     --secondary-color: #374151;
     --accent-color: #3B82F6;
-    --github-color: #24292F;
     --success-color: #059669;
     --warning-color: #D97706;
     --error-color: #EF4444;
@@ -115,15 +114,6 @@ body {
     background-color: #F9FAFB;
 }
 
-.btn-github {
-    background-color: var(--github-color);
-    color: white;
-}
-
-.btn-github:hover:not(:disabled) {
-    background-color: #1c2127;
-}
-
 .btn-success {
     background-color: var(--success-color);
     color: white;
@@ -131,99 +121,6 @@ body {
 
 .btn-success:hover:not(:disabled) {
     background-color: #047857;
-}
-
-/* GitHub 관련 스타일 */
-.github-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.github-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    border-radius: 0.25rem;
-    margin-top: 0.5rem;
-    font-weight: 500;
-}
-
-.github-status.connected {
-    background-color: #ECFDF5;
-    color: var(--success-color);
-    border: 1px solid #A7F3D0;
-}
-
-.github-status.disconnected {
-    background-color: #FEF3C7;
-    color: var(--warning-color);
-    border: 1px solid #FDE68A;
-}
-
-.github-info {
-    margin-bottom: 1.5rem;
-}
-
-.info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background-color: #EBF8FF;
-    border: 1px solid #93C5FD;
-    border-radius: 0.375rem;
-    color: #1E40AF;
-    font-size: 0.875rem;
-}
-
-.info-box i {
-    color: #3B82F6;
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-}
-
-.warning-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background-color: #FEF3C7;
-    border: 1px solid #FDE68A;
-    border-radius: 0.375rem;
-    color: #92400E;
-    font-size: 0.875rem;
-    margin-top: 1rem;
-}
-
-.warning-box i {
-    color: var(--warning-color);
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-}
-
-.share-result {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background-color: #ECFDF5;
-    border: 1px solid #A7F3D0;
-    border-radius: 0.375rem;
-}
-
-.share-result h4 {
-    color: var(--success-color);
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-}
-
-.url-input-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.url-input-group input {
-    flex: 1;
 }
 
 /* 타임라인 컨테이너 */
@@ -724,32 +621,12 @@ body {
     height: 5rem;
 }
 
-.form-help {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-gray-400);
-    margin-top: 0.25rem;
-}
-
 .color-input {
     width: 3rem;
     height: 2.25rem;
     border: 1px solid #D1D5DB;
     border-radius: 0.375rem;
     cursor: pointer;
-}
-
-.checkbox-label {
-    display: flex !important;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: normal !important;
-    cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-    width: auto;
-    margin: 0;
 }
 
 .time-inputs {
@@ -867,11 +744,6 @@ body {
     .header-buttons {
         justify-content: center;
     }
-
-    .github-buttons {
-        width: 100%;
-        justify-content: center;
-    }
     
     .timeline-container {
         padding: 1rem 0.5rem;
@@ -928,16 +800,6 @@ body {
     
     .sub-event-card {
         max-width: 14rem;
-    }
-
-    .github-buttons {
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .header-buttons {
-        flex-direction: column;
-        align-items: center;
     }
 }
 
