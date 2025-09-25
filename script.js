@@ -61,8 +61,6 @@ class TRPGTimeline {
         this.editingTime = null;
         this.editingEvent = null;
         this.editingCharacter = null;
-        this.currentGistId = null;
-        this.currentGistUrl = null;
 
         this.init();
     }
