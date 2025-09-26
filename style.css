@@ -651,8 +651,8 @@ body {
 }
 
 .characters-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
 }
 
@@ -679,6 +679,13 @@ body {
 
 .character-name {
     font-size: 0.875rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.character-name:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
 }
 
 .character-actions {
