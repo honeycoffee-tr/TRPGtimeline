@@ -61,12 +61,15 @@ class TRPGTimeline {
         this.editingTime = null;
         this.editingEvent = null;
         this.editingCharacter = null;
+        this.contextMenuTarget = null;
+        this.contextMenuType = null;
 
         this.init();
     }
 
     init() {
         this.setupEventListeners();
+        this.setupContextMenu();
         this.render();
         this.createIcons();
     }
@@ -94,6 +97,90 @@ class TRPGTimeline {
         // 모달 관련 이벤트
         this.setupModalEvents();
         this.setupFormEvents();
+    }
+
+    // 컨텍스트 메뉴 설정
+    setupContextMenu() {
+        const contextMenu = document.getElementById('context-menu');
+        const contextEdit = document.getElementById('context-edit');
+        const contextDelete = document.getElementById('context-delete');
+
+        // 컨텍스트 메뉴 외부 클릭시 닫기
+        document.addEventListener('click', (e) => {
+            if (!contextMenu.contains(e.target)) {
+                this.hideContextMenu();
+            }
+        });
+
+        // 우클릭 방지 (기본 컨텍스트 메뉴 안나오게)
+        document.addEventListener('contextmenu', (e) => {
+            // 타임라인 영역에서만 기본 컨텍스트 메뉴 방지
+            if (e.target.closest('.timeline-container')) {
+                e.preventDefault();
+            }
+        });
+
+        // 컨텍스트 메뉴 액션
+        contextEdit.addEventListener('click', () => {
+            this.handleContextEdit();
+            this.hideContextMenu();
+        });
+
+        contextDelete.addEventListener('click', () => {
+            this.handleContextDelete();
+            this.hideContextMenu();
+        });
+    }
+
+    showContextMenu(e, target, type) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.contextMenuTarget = target;
+        this.contextMenuType = type;
+
+        const contextMenu = document.getElementById('context-menu');
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = e.pageX + 'px';
+        contextMenu.style.top = e.pageY + 'px';
+
+        // 화면 밖으로 나가지 않도록 조정
+        const rect = contextMenu.getBoundingClientRect();
+        if (rect.right > window.innerWidth) {
+            contextMenu.style.left = (e.pageX - rect.width) + 'px';
+        }
+        if (rect.bottom > window.innerHeight) {
+            contextMenu.style.top = (e.pageY - rect.height) + 'px';
+        }
+
+        this.createIcons();
+    }
+
+    hideContextMenu() {
+        const contextMenu = document.getElementById('context-menu');
+        contextMenu.style.display = 'none';
+        this.contextMenuTarget = null;
+        this.contextMenuType = null;
+    }
+
+    handleContextEdit() {
+        if (this.contextMenuType === 'time' && this.contextMenuTarget) {
+            this.editTime(this.contextMenuTarget);
+        } else if (this.contextMenuType === 'event' && this.contextMenuTarget) {
+            this.editEvent(this.contextMenuTarget);
+        }
+    }
+
+    handleContextDelete() {
+        if (this.contextMenuType === 'time' && this.contextMenuTarget) {
+            if (confirm('이 시간대를 삭제하시겠습니까? 관련된 모든 사건도 함께 삭제됩니다.')) {
+                this.deleteTime(this.contextMenuTarget.id);
+            }
+        } else if (this.contextMenuType === 'event' && this.contextMenuTarget) {
+            if (confirm('이 사건을 삭제하시겠습니까?')) {
+                this.deleteEvent(this.contextMenuTarget.id);
+            }
+        }
     }
 
     setupModalEvents() {
@@ -530,6 +617,11 @@ class TRPGTimeline {
 
     // 이벤트 리스너 설정 함수들
     setupTimeNodeEventListeners(label, timeNode) {
+        // 우클릭 컨텍스트 메뉴
+        label.addEventListener('contextmenu', (e) => {
+            this.showContextMenu(e, timeNode, 'time');
+        });
+
         // 드래그 시작
         label.addEventListener('dragstart', (e) => {
             this.draggedTime = timeNode;
@@ -582,6 +674,11 @@ class TRPGTimeline {
         const card = container.querySelector('.main-event-card');
         const header = container.querySelector('.main-event-header');
 
+        // 우클릭 컨텍스트 메뉴
+        card.addEventListener('contextmenu', (e) => {
+            this.showContextMenu(e, event, 'event');
+        });
+
         // 드래그
         card.addEventListener('dragstart', (e) => {
             this.draggedEvent = event;
@@ -614,6 +711,11 @@ class TRPGTimeline {
 
     setupSubEventListeners(container, event) {
         const card = container.querySelector('.sub-event-card');
+
+        // 우클릭 컨텍스트 메뉴
+        card.addEventListener('contextmenu', (e) => {
+            this.showContextMenu(e, event, 'event');
+        });
 
         // 드래그
         card.addEventListener('dragstart', (e) => {
