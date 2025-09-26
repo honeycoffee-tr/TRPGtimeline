@@ -1298,6 +1298,12 @@ class TRPGTimeline {
                 </div>
             `;
             
+            // 이름 클릭으로 수정
+            item.querySelector('.character-name').addEventListener('click', () => {
+                this.editCharacter(character);
+            });
+            
+            // 기존 버튼 이벤트
             item.querySelector('.edit-character').addEventListener('click', () => this.editCharacter(character));
             item.querySelector('.delete-character').addEventListener('click', () => this.deleteCharacter(character.id));
             
