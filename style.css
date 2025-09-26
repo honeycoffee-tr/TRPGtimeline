@@ -443,6 +443,15 @@ body {
     /* top: -16px; 제거하여 겹침 문제 해결 */
 }
 
+/* 기존 attached-event 관련 CSS를 모두 이것으로 교체하세요 */
+
+.attached-event {
+    position: relative;
+    width: 100%;
+    z-index: 15;
+    margin-bottom: 1rem;
+}
+
 .attached-event .event-content {
     position: relative;
     z-index: 16;
@@ -452,23 +461,33 @@ body {
 }
 
 .attached-event .main-event-wrapper {
-    position: relative; /* absolute에서 relative로 변경 */
+    position: relative;
     width: 100%;
-    /* pointer-events: none; 제거 - 정상적인 상호작용 허용 */
 }
 
-.attached-event .main-event-card {
-    /* pointer-events: auto; 불필요하므로 제거 */
+/* 연결선을 카드 헤더의 중앙에 맞춤 - 1rem은 헤더의 절반 높이 정도 */
+.attached-event .main-event-side.left .main-event-card::before {
+    content: '';
+    position: absolute;
+    left: 100% !important;
+    top: 1.5rem !important;  /* 헤더 중앙 위치로 조정 */
+    transform: none !important;  /* transform 제거 */
+    height: 2px;
+    width: 2rem;
+    background-color: var(--timeline-color);
+    z-index: 0;
 }
 
-.attached-event .main-event-wrapper .main-event-side.left .main-event-card::before {
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.attached-event .main-event-wrapper .main-event-side.right .main-event-card::before {
-    top: 50%;
-    transform: translateY(-50%);
+.attached-event .main-event-side.right .main-event-card::before {
+    content: '';
+    position: absolute;
+    right: 100% !important;
+    top: 1.5rem !important;  /* 헤더 중앙 위치로 조정 */
+    transform: none !important;  /* transform 제거 */
+    height: 2px;
+    width: 2rem;
+    background-color: var(--timeline-color);
+    z-index: 0;
 }
 
 /* 공통 액션 버튼 */
