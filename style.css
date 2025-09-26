@@ -461,13 +461,14 @@ body {
     /* pointer-events: auto; 불필요하므로 제거 */
 }
 
-.attached-event .main-event-card::before {
-    top: 50%; /* 카드의 중앙으로 변경 */
-    transform: translateY(-50%); /* 중앙 정렬을 위한 변환 */
-    height: 2px;
-    width: 2rem;
-    background-color: var(--timeline-color);
-    z-index: 0;
+.attached-event .main-event-wrapper .main-event-side.left .main-event-card::before {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.attached-event .main-event-wrapper .main-event-side.right .main-event-card::before {
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* 공통 액션 버튼 */
