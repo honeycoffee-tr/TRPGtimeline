@@ -68,7 +68,17 @@ class TRPGTimeline {
     init() {
         this.setupEventListeners();
         this.render();
-        lucide.createIcons();
+        this.createIcons();
+    }
+
+    // Lucide 아이콘 생성 - 안전하게 처리
+    createIcons() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        } else {
+            // lucide가 아직 로드되지 않았다면 잠시 후 다시 시도
+            setTimeout(() => this.createIcons(), 100);
+        }
     }
 
     // 이벤트 리스너 설정
@@ -667,7 +677,7 @@ class TRPGTimeline {
         
         this.draggedEvent = null;
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     handleEventDropOnTimeNode(targetTimeNodeId) {
