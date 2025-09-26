@@ -145,28 +145,6 @@ body {
     z-index: 1;
 }
 
-/* attached event 연결선 */
-.attached-event-card::before {
-    content: '';
-    position: absolute;
-    top: 16px;
-    height: 2px;
-    width: 2rem;
-    background-color: var(--timeline-color);
-    z-index: 1;
-}
-
-/* 모든 카드들 */
-.main-event-card,
-.attached-event-card,
-.sub-event-card {
-    z-index: 10;
-}
-
-.time-node-label {
-    z-index: 20;
-}
-
 /* 시간 노드 컨테이너 */
 .time-node-container {
     position: relative;
@@ -246,7 +224,7 @@ body {
     position: relative;
 }
 
-/* 메인 이벤트 - 완전히 새로운 접근 */
+/* 메인 이벤트 */
 .main-event-wrapper {
     display: flex;
     width: 100%;
@@ -279,7 +257,6 @@ body {
     justify-content: flex-start;
 }
 
-/* 오른쪽 정렬 문제 해결을 위한 추가 스타일 */
 .main-event-wrapper.position-right .main-event-side.right {
     margin-left: auto;
 }
@@ -778,14 +755,6 @@ body {
     
     .time-node-container {
         margin-bottom: 2rem;
-    }
-
-    .url-input-group {
-        flex-direction: column;
-    }
-
-    .url-input-group input {
-        margin-bottom: 0.5rem;
     }
 }
 
