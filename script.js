@@ -1402,6 +1402,43 @@ class TRPGTimeline {
     }
 }
 
+function drawElbowLine(timeBox, eventBox) {
+  const timeRect = timeBox.getBoundingClientRect();
+  const eventRect = eventBox.getBoundingClientRect();
+
+  const timeX = timeRect.right + window.scrollX; // timeBox 오른쪽 중앙
+  const timeY = timeRect.top + timeRect.height / 2 + window.scrollY;
+
+  const eventX = eventRect.left + window.scrollX; // eventBox 왼쪽 중앙
+  const eventY = eventRect.top + eventRect.height / 2 + window.scrollY;
+
+  const midX = (timeX + eventX) / 2; // 꺾이는 지점 (중간 x값)
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  const d = `M ${timeX},${timeY} H ${midX} V ${eventY} H ${eventX}`;
+  path.setAttribute("d", d);
+  path.setAttribute("stroke", "black");
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute("fill", "none");
+
+  return path;
+}
+
+function drawAllLines() {
+  svg.innerHTML = "";
+  const timeBoxes = document.querySelectorAll(".time-box");
+  const eventBoxes = document.querySelectorAll(".event-box");
+
+  timeBoxes.forEach((timeBox, index) => {
+    const eventBox = eventBoxes[index];
+    if (eventBox) {
+      const path = drawElbowLine(timeBox, eventBox);
+      svg.appendChild(path);
+    }
+  });
+}
+
+
 // 앱 초기화
 document.addEventListener('DOMContentLoaded', () => {
     new TRPGTimeline();
