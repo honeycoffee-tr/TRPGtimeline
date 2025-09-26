@@ -1213,25 +1213,72 @@ class TRPGTimeline {
         const file = event.target.files[0];
         if (!file) return;
 
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            alert('JSON 파일만 업로드할 수 있습니다.');
+            event.target.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
+                console.log('파일 읽기 완료, 내용:', e.target.result);
+                
                 const data = JSON.parse(e.target.result);
-                if (data.scenario && data.timeNodes && data.events) {
-                    this.scenario = data.scenario;
-                    this.timeNodes = data.timeNodes;
-                    this.events = data.events.map(evt => ({ ...evt, expanded: false }));
-                    this.render();
-                    lucide.createIcons();
-                    alert('파일을 성공적으로 불러왔습니다!');
-                } else {
-                    alert('파일 형식이 올바르지 않습니다.');
+                console.log('JSON 파싱 완료:', data);
+                
+                // 데이터 구조 확인
+                if (!data || typeof data !== 'object') {
+                    alert('올바른 JSON 파일이 아닙니다.');
+                    return;
                 }
+                
+                if (!data.scenario) {
+                    alert('시나리오 정보가 없습니다. 올바른 TRPG 타임라인 파일이 아닙니다.');
+                    return;
+                }
+                
+                if (!data.timeNodes || !Array.isArray(data.timeNodes)) {
+                    alert('시간 노드 정보가 없습니다. 올바른 TRPG 타임라인 파일이 아닙니다.');
+                    return;
+                }
+                
+                if (!data.events || !Array.isArray(data.events)) {
+                    alert('이벤트 정보가 없습니다. 올바른 TRPG 타임라인 파일이 아닙니다.');
+                    return;
+                }
+
+                // 데이터 로드
+                this.scenario = {
+                    title: data.scenario.title || 'TRPG 시나리오 타임라인',
+                    overview: data.scenario.overview || '',
+                    baseYear: data.scenario.baseYear || '',
+                    characters: data.scenario.characters || []
+                };
+                
+                this.timeNodes = data.timeNodes;
+                this.events = data.events.map(evt => ({ 
+                    ...evt, 
+                    expanded: false 
+                }));
+
+                console.log('데이터 로드 완료');
+                this.render();
+                lucide.createIcons();
+                alert('파일을 성공적으로 불러왔습니다!');
+                
             } catch (error) {
-                alert('파일을 읽는 중 오류가 발생했습니다.');
+                console.error('파일 가져오기 오류:', error);
+                alert(`파일을 읽는 중 오류가 발생했습니다:\n${error.message}\n\n콘솔을 확인하여 자세한 정보를 확인하세요.`);
             }
         };
-        reader.readAsText(file);
+        
+        reader.onerror = (error) => {
+            console.error('파일 읽기 오류:', error);
+            alert('파일을 읽을 수 없습니다. 파일이 손상되었을 수 있습니다.');
+        };
+        
+        reader.readAsText(file, 'UTF-8');
         event.target.value = '';
     }
 }
