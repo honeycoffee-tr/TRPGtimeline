@@ -462,7 +462,8 @@ body {
 }
 
 .attached-event .main-event-card::before {
-    top: 1rem;
+    top: 50%; /* 카드의 중앙으로 변경 */
+    transform: translateY(-50%); /* 중앙 정렬을 위한 변환 */
     height: 2px;
     width: 2rem;
     background-color: var(--timeline-color);
