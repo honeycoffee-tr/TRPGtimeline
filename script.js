@@ -71,19 +71,15 @@ class TRPGTimeline {
         this.createIcons();
     }
 
-    // Lucide 아이콘 생성 - 완전히 안전하게 처리
+    // Lucide 아이콘 생성 - 오류가 나도 앱 작동에는 영향 없도록
     createIcons() {
-        // 아이콘 생성을 비동기로 처리하여 오류 방지
-        setTimeout(() => {
-            try {
-                if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
-                    lucide.createIcons();
-                }
-            } catch (error) {
-                // 모든 lucide 관련 오류를 조용히 처리
-                // 아이콘이 없어도 기능상 문제없음
+        try {
+            if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
+                lucide.createIcons();
             }
-        }, 50);
+        } catch (error) {
+            // lucide 오류는 조용히 무시 (앱 기능에 영향 없음)
+        }
     }
 
     // 이벤트 리스너 설정
@@ -1279,12 +1275,7 @@ class TRPGTimeline {
 
                 console.log('데이터 로드 완료');
                 this.render();
-                
-                // 아이콘 생성을 지연시켜 안전하게 처리
-                setTimeout(() => {
-                    this.createIcons();
-                }, 300);
-                
+                this.createIcons();
                 alert('파일을 성공적으로 불러왔습니다!');
                 
             } catch (error) {
@@ -1303,16 +1294,7 @@ class TRPGTimeline {
     }
 }
 
-// 앱 초기화 - lucide 로딩을 확실히 기다린 후 실행
-function initializeApp() {
-    if (typeof lucide !== 'undefined' && lucide.createIcons) {
-        new TRPGTimeline();
-    } else {
-        // lucide가 아직 로드되지 않았다면 잠시 후 다시 시도
-        setTimeout(initializeApp, 100);
-    }
-}
-
+// 앱 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
+    new TRPGTimeline();
 });
