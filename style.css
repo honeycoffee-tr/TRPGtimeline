@@ -439,7 +439,8 @@ body {
     position: relative;
     width: 100%;
     z-index: 15;
-    top: -16px;
+    margin-bottom: 1rem; /* 아래 요소와의 간격 확보 */
+    /* top: -16px; 제거하여 겹침 문제 해결 */
 }
 
 .attached-event .event-content {
@@ -451,13 +452,13 @@ body {
 }
 
 .attached-event .main-event-wrapper {
-    position: absolute;
+    position: relative; /* absolute에서 relative로 변경 */
     width: 100%;
-    pointer-events: none;
+    /* pointer-events: none; 제거 - 정상적인 상호작용 허용 */
 }
 
 .attached-event .main-event-card {
-    pointer-events: auto;
+    /* pointer-events: auto; 불필요하므로 제거 */
 }
 
 .attached-event .main-event-card::before {
