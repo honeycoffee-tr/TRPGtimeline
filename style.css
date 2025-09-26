@@ -669,11 +669,11 @@ body {
 
 .character-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* 위쪽 정렬로 변경하여 동그라미가 첫 줄에 고정 */
     gap: 0.5rem;
     flex: 1;
     min-width: 0; /* flex 아이템이 축소될 수 있도록 */
-    overflow: hidden; /* 넘치는 내용 숨김 */
+    overflow: visible; /* 줄바꿈 허용을 위해 visible로 변경 */
 }
 
 .character-color {
@@ -681,17 +681,19 @@ body {
     height: 0.75rem;
     border-radius: 50%;
     flex-shrink: 0; /* 동그라미는 크기 유지 */
+    margin-top: 0.125rem; /* 텍스트 첫 줄과 수직 정렬을 위한 미세 조정 */
 }
 
 .character-name {
     font-size: 0.875rem;
     cursor: pointer;
     transition: color 0.2s;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    word-wrap: break-word; /* 긴 단어도 줄바꿈 */
+    word-break: break-word; /* 단어 중간에서도 줄바꿈 허용 */
+    white-space: normal; /* 줄바꿈 허용 */
     min-width: 0; /* 텍스트가 축소될 수 있도록 */
-    flex: 1; /* 남은 공간을 차지하되 넘치지 않게 */
+    flex: 1; /* 남은 공간을 차지 */
+    line-height: 1.3; /* 줄 간격 조정 */
 }
 
 .character-name:hover {
