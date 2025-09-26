@@ -71,14 +71,19 @@ class TRPGTimeline {
         this.createIcons();
     }
 
-    // Lucide 아이콘 생성 - 안전하게 처리
+    // Lucide 아이콘 생성 - 완전히 안전하게 처리
     createIcons() {
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        } else {
-            // lucide가 아직 로드되지 않았다면 잠시 후 다시 시도
-            setTimeout(() => this.createIcons(), 100);
-        }
+        // 아이콘 생성을 비동기로 처리하여 오류 방지
+        setTimeout(() => {
+            try {
+                if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                // 모든 lucide 관련 오류를 조용히 처리
+                // 아이콘이 없어도 기능상 문제없음
+            }
+        }, 50);
     }
 
     // 이벤트 리스너 설정
@@ -691,7 +696,7 @@ class TRPGTimeline {
         
         this.draggedEvent = null;
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     handleEventDropBetween(targetEvent, position) {
@@ -721,7 +726,7 @@ class TRPGTimeline {
         
         this.draggedTime = null;
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     handleTimeDropBetween(targetTimeNode, position) {
@@ -751,7 +756,7 @@ class TRPGTimeline {
         
         this.draggedTime = null;
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     isDescendant(nodeId, potentialAncestorId) {
@@ -770,7 +775,7 @@ class TRPGTimeline {
         );
         
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
         
         // 확장 후 스크롤 조정 (선택사항)
         setTimeout(() => {
@@ -784,7 +789,7 @@ class TRPGTimeline {
     deleteEvent(eventId) {
         this.events = this.events.filter(event => event.id !== eventId);
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     editEvent(event) {
@@ -800,7 +805,7 @@ class TRPGTimeline {
         this.timeNodes = this.timeNodes.filter(time => !allIdsToDelete.includes(time.id));
         this.events = this.events.filter(event => !allIdsToDelete.includes(event.timeNodeId));
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     editTime(timeNode) {
@@ -841,7 +846,7 @@ class TRPGTimeline {
 
     openModal(modalId) {
         document.getElementById(modalId).classList.add('active');
-        lucide.createIcons();
+        this.createIcons();
     }
 
     closeModal(modalId) {
@@ -1072,7 +1077,7 @@ class TRPGTimeline {
 
         this.closeModal('time-modal');
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     saveEvent() {
@@ -1121,7 +1126,7 @@ class TRPGTimeline {
 
         this.closeModal('event-modal');
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     // 캐릭터 관리
@@ -1155,7 +1160,7 @@ class TRPGTimeline {
         this.renderCharactersList();
         this.updateEventCharacterSelect();
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     editCharacter(character) {
@@ -1170,7 +1175,7 @@ class TRPGTimeline {
         this.renderCharactersList();
         this.updateEventCharacterSelect();
         this.renderTimeline();
-        lucide.createIcons();
+        this.createIcons();
     }
 
     renderCharactersList() {
@@ -1274,7 +1279,12 @@ class TRPGTimeline {
 
                 console.log('데이터 로드 완료');
                 this.render();
-                lucide.createIcons();
+                
+                // 아이콘 생성을 지연시켜 안전하게 처리
+                setTimeout(() => {
+                    this.createIcons();
+                }, 300);
+                
                 alert('파일을 성공적으로 불러왔습니다!');
                 
             } catch (error) {
@@ -1293,7 +1303,16 @@ class TRPGTimeline {
     }
 }
 
-// 앱 초기화
+// 앱 초기화 - lucide 로딩을 확실히 기다린 후 실행
+function initializeApp() {
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        new TRPGTimeline();
+    } else {
+        // lucide가 아직 로드되지 않았다면 잠시 후 다시 시도
+        setTimeout(initializeApp, 100);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    new TRPGTimeline();
+    initializeApp();
 });
