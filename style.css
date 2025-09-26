@@ -663,6 +663,8 @@ body {
     padding: 0.5rem;
     background: #F9FAFB;
     border-radius: 0.375rem;
+    max-width: 100%; /* 그리드 셀 너비를 넘지 않도록 */
+    min-width: 0; /* flex 아이템이 축소될 수 있도록 */
 }
 
 .character-info {
@@ -671,6 +673,7 @@ body {
     gap: 0.5rem;
     flex: 1;
     min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+    overflow: hidden; /* 넘치는 내용 숨김 */
 }
 
 .character-color {
@@ -688,6 +691,7 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0; /* 텍스트가 축소될 수 있도록 */
+    flex: 1; /* 남은 공간을 차지하되 넘치지 않게 */
 }
 
 .character-name:hover {
@@ -700,6 +704,7 @@ body {
     gap: 0.25rem;
     opacity: 0;
     transition: opacity 0.2s;
+    flex-shrink: 0; /* 액션 버튼들은 크기 유지 */
 }
 
 .character-item:hover .character-actions {
