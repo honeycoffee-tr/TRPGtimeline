@@ -669,18 +669,25 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex: 1;
+    min-width: 0; /* flex 아이템이 축소될 수 있도록 */
 }
 
 .character-color {
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
+    flex-shrink: 0; /* 동그라미는 크기 유지 */
 }
 
 .character-name {
     font-size: 0.875rem;
     cursor: pointer;
     transition: color 0.2s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0; /* 텍스트가 축소될 수 있도록 */
 }
 
 .character-name:hover {
