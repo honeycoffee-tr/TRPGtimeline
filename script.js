@@ -1,4 +1,4 @@
-// TRPG Timeline Application - GitHub 협업 기능 포함
+// TRPG Timeline Application
 class TRPGTimeline {
     constructor() {
         this.scenario = {
@@ -79,10 +79,6 @@ class TRPGTimeline {
         document.getElementById('event-btn').addEventListener('click', () => this.openEventModal());
         document.getElementById('export-btn').addEventListener('click', () => this.exportData());
         document.getElementById('import-file').addEventListener('change', (e) => this.importData(e));
-        
-        // GitHub 관련 버튼들
-        document.getElementById('github-share-btn').addEventListener('click', () => this.openGithubShareModal());
-        document.getElementById('github-load-btn').addEventListener('click', () => this.openGithubLoadModal());
 
         // 모달 관련 이벤트
         this.setupModalEvents();
@@ -132,10 +128,6 @@ class TRPGTimeline {
         document.getElementById('event-type').addEventListener('change', (e) => this.toggleEventFields(e.target.value));
         document.getElementById('save-event-btn').addEventListener('click', () => this.saveEvent());
         document.getElementById('event-content').addEventListener('input', (e) => this.updateCharCount(e.target));
-
-        // GitHub 모달 이벤트
-        document.getElementById('share-to-gist-btn').addEventListener('click', () => this.shareToGist());
-        document.getElementById('load-from-gist-btn').addEventListener('click', () => this.loadFromGist());
     }
 
     // 렌더링 함수들
@@ -225,8 +217,6 @@ class TRPGTimeline {
     }
 
     createTimeNode(timeNode) {
-        const nodeStyle = this.getTimeNodeStyle(timeNode.size || 'small');
-        
         const timeNodeDiv = document.createElement('div');
         timeNodeDiv.className = 'time-node';
 
@@ -480,18 +470,6 @@ class TRPGTimeline {
     getCharacterColor(characterName) {
         const character = this.scenario.characters.find(char => char.name === characterName);
         return character ? character.color : '#374151';
-    }
-
-    getTimeNodeStyle(size) {
-        switch(size) {
-            case 'large':
-                return { node: 'w-4 h-4', label: 'px-4 py-2 text-sm font-semibold' };
-            case 'medium':
-                return { node: 'w-3.5 h-3.5', label: 'px-3 py-1.5 text-xs font-medium' };
-            case 'small':
-            default:
-                return { node: 'w-3 h-3', label: 'px-3 py-1 text-xs font-medium' };
-        }
     }
 
     // 드롭 존 및 이벤트 리스너 설정
@@ -1245,6 +1223,7 @@ class TRPGTimeline {
                     this.events = data.events.map(evt => ({ ...evt, expanded: false }));
                     this.render();
                     lucide.createIcons();
+                    alert('파일을 성공적으로 불러왔습니다!');
                 } else {
                     alert('파일 형식이 올바르지 않습니다.');
                 }
@@ -1255,187 +1234,9 @@ class TRPGTimeline {
         reader.readAsText(file);
         event.target.value = '';
     }
-
-    // GitHub 협업 기능들
-    openGithubShareModal() {
-        this.openModal('github-share-modal');
-    }
-
-    openGithubLoadModal() {
-        this.openModal('github-load-modal');
-    }
-
-    async shareToGist() {
-        const title = document.getElementById('gist-title').value.trim() || this.scenario.title;
-        const description = document.getElementById('gist-description').value.trim();
-        const isPublic = document.getElementById('gist-public').checked;
-
-        if (!title) {
-            alert('제목을 입력해주세요.');
-            return;
-        }
-
-        try {
-            document.getElementById('share-to-gist-btn').disabled = true;
-            document.getElementById('share-to-gist-btn').textContent = '공유 중...';
-
-            const data = {
-                scenario: this.scenario,
-                timeNodes: this.timeNodes,
-                events: this.events,
-                metadata: {
-                    createdAt: new Date().toISOString(),
-                    version: '1.0'
-                }
-            };
-
-            const gistData = {
-                description: description || `TRPG 타임라인: ${title}`,
-                public: isPublic,
-                files: {
-                    [`${title.replace(/[^a-zA-Z0-9가-힣\s]/g, '')}.json`]: {
-                        content: JSON.stringify(data, null, 2)
-                    }
-                }
-            };
-
-            const response = await fetch('https://api.github.com/gists', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(gistData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Gist 생성에 실패했습니다.');
-            }
-
-            const result = await response.json();
-            this.currentGistId = result.id;
-            this.currentGistUrl = result.html_url;
-
-            // 결과 표시
-            document.getElementById('share-result').style.display = 'block';
-            document.getElementById('gist-url').value = result.html_url;
-            document.getElementById('gist-raw-url').value = result.files[Object.keys(result.files)[0]].raw_url;
-
-            this.updateGithubStatus(true, result.html_url);
-            
-        } catch (error) {
-            console.error('Gist 공유 오류:', error);
-            alert('GitHub Gist 공유에 실패했습니다: ' + error.message);
-        } finally {
-            document.getElementById('share-to-gist-btn').disabled = false;
-            document.getElementById('share-to-gist-btn').textContent = 'GitHub에 공유';
-        }
-    }
-
-    async loadFromGist() {
-        const gistUrl = document.getElementById('load-gist-url').value.trim();
-        
-        if (!gistUrl) {
-            alert('GitHub Gist URL을 입력해주세요.');
-            return;
-        }
-
-        try {
-            document.getElementById('load-from-gist-btn').disabled = true;
-            document.getElementById('load-from-gist-btn').textContent = '불러오는 중...';
-
-            let gistId;
-            
-            // URL에서 Gist ID 추출
-            if (gistUrl.includes('gist.github.com')) {
-                gistId = gistUrl.split('/').pop();
-            } else if (gistUrl.includes('raw.githubusercontent.com')) {
-                // raw URL인 경우 gist ID 추출
-                const urlParts = gistUrl.split('/');
-                gistId = urlParts[4]; // raw URL 구조에서 gist ID 위치
-            } else {
-                gistId = gistUrl;
-            }
-
-            // Gist 정보 가져오기
-            const response = await fetch(`https://api.github.com/gists/${gistId}`);
-            
-            if (!response.ok) {
-                throw new Error('Gist를 찾을 수 없습니다. URL을 확인해주세요.');
-            }
-
-            const gist = await response.json();
-            const files = Object.values(gist.files);
-            
-            if (files.length === 0) {
-                throw new Error('Gist에 파일이 없습니다.');
-            }
-
-            // 첫 번째 파일의 내용 가져오기
-            const fileContent = files[0].content;
-            const data = JSON.parse(fileContent);
-
-            // 데이터 유효성 검사
-            if (!data.scenario || !data.timeNodes || !data.events) {
-                throw new Error('올바른 TRPG 타임라인 형식이 아닙니다.');
-            }
-
-            // 데이터 로드
-            this.scenario = data.scenario;
-            this.timeNodes = data.timeNodes;
-            this.events = data.events.map(evt => ({ ...evt, expanded: false }));
-
-            this.currentGistId = gistId;
-            this.currentGistUrl = gist.html_url;
-
-            this.closeModal('github-load-modal');
-            this.render();
-            lucide.createIcons();
-
-            this.updateGithubStatus(true, gist.html_url);
-            alert('GitHub Gist에서 타임라인을 성공적으로 불러왔습니다!');
-
-        } catch (error) {
-            console.error('Gist 로드 오류:', error);
-            alert('GitHub Gist 불러오기에 실패했습니다: ' + error.message);
-        } finally {
-            document.getElementById('load-from-gist-btn').disabled = false;
-            document.getElementById('load-from-gist-btn').textContent = 'Gist에서 불러오기';
-        }
-    }
-
-    updateGithubStatus(connected, url = null) {
-        const statusEl = document.getElementById('github-status');
-        if (connected) {
-            statusEl.className = 'github-status connected';
-            statusEl.innerHTML = '<i data-lucide="check-circle"></i>GitHub 연결됨';
-            if (url) {
-                statusEl.title = `연결된 Gist: ${url}`;
-            }
-        } else {
-            statusEl.className = 'github-status disconnected';
-            statusEl.innerHTML = '<i data-lucide="alert-circle"></i>GitHub 미연결';
-            statusEl.title = '';
-        }
-        lucide.createIcons();
-    }
-
-    copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('클립보드에 복사되었습니다!');
-        }).catch(() => {
-            // fallback
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('클립보드에 복사되었습니다!');
-        });
-    }
 }
 
 // 앱 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new TRPGTimeline();
+    new TRPGTimeline();
 });
