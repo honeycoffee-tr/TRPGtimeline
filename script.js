@@ -1438,6 +1438,62 @@ function drawAllLines() {
   });
 }
 
+// ============================
+// 기존 script.js 마지막 부분 ↓
+// ============================
+
+// 창 크기 변경 시 선 업데이트
+window.addEventListener("resize", () => {
+  updateConnectionLines();
+});
+
+// ============================
+// 새로 추가할 함수
+// ============================
+
+function updateConnectionLines() {
+  const svg = document.getElementById("connection-lines");
+  if (!svg) return;
+
+  svg.innerHTML = "";
+
+  const timeBoxes = document.querySelectorAll(".time-box");
+  const eventBoxes = document.querySelectorAll(".event-box");
+
+  timeBoxes.forEach((timeBox, index) => {
+    const eventBox = eventBoxes[index];
+    if (!eventBox) return;
+
+    const timeRect = timeBox.getBoundingClientRect();
+    const eventRect = eventBox.getBoundingClientRect();
+
+    const svgRect = svg.getBoundingClientRect();
+
+    const timeX = timeRect.left + timeRect.width / 2 - svgRect.left;
+    const timeY = timeRect.top + timeRect.height / 2 - svgRect.top;
+
+    let eventX, eventY;
+    if (eventBox.classList.contains("left")) {
+      // 왼쪽 사건박스 → 오른쪽 끝에서 연결
+      eventX = eventRect.right - svgRect.left;
+      eventY = eventRect.top + eventRect.height / 2 - svgRect.top;
+    } else {
+      // 오른쪽 사건박스 → 왼쪽 끝에서 연결
+      eventX = eventRect.left - svgRect.left;
+      eventY = eventRect.top + eventRect.height / 2 - svgRect.top;
+    }
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", timeX);
+    line.setAttribute("y1", timeY);
+    line.setAttribute("x2", eventX);
+    line.setAttribute("y2", eventY);
+    line.setAttribute("stroke", "#555");
+    line.setAttribute("stroke-width", "2");
+
+    svg.appendChild(line);
+  });
+}
 
 // 앱 초기화
 document.addEventListener('DOMContentLoaded', () => {
