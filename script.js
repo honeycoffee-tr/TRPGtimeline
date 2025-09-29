@@ -1,4 +1,4 @@
-// TRPG Timeline Application
+// TRPG Timeline Application - Part 1
 class TRPGTimeline {
     constructor() {
         this.scenario = {
@@ -56,6 +56,17 @@ class TRPGTimeline {
             }
         ];
 
+        // 테마 설정 추가
+        this.theme = {
+            background: { type: 'color', value: '#F9FAFB', image: null },
+            header: { type: 'color', value: '#FFFFFF', image: null },
+            button: { color: '#FFFFFF' },
+            buttonPrimary: { color: '#1F2937' },
+            timenode: { type: 'color', value: '#1F2937', image: null },
+            mainevent: { type: 'color', value: '#FFFFFF', image: null },
+            subevent: { type: 'color', value: '#FFFFFF', image: null }
+        };
+
         this.draggedEvent = null;
         this.draggedTime = null;
         this.editingTime = null;
@@ -70,57 +81,408 @@ class TRPGTimeline {
     init() {
         this.setupEventListeners();
         this.setupContextMenu();
+        this.setupThemeSettings();
         this.render();
+        this.applyTheme();
         this.createIcons();
     }
 
-    // Lucide 아이콘 생성 - 오류가 나도 앱 작동에는 영향 없도록
     createIcons() {
         try {
             if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
                 lucide.createIcons();
             }
         } catch (error) {
-            // lucide 오류는 조용히 무시 (앱 기능에 영향 없음)
+            console.warn('Lucide icons could not be loaded:', error);
         }
     }
 
-    // 이벤트 리스너 설정
+    // 색상 대비 계산 함수 (가독성을 위한 텍스트 색상 결정)
+    getContrastColor(hexColor) {
+        // hex 색상을 RGB로 변환
+        const hex = hexColor.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        // 밝기 계산 (0-255)
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        
+        // 밝기가 중간값(128)보다 높으면 검은색, 낮으면 흰색 반환
+        return brightness > 128 ? '#000000' : '#FFFFFF';
+    }
+
+    // 테마 설정 이벤트 리스너
+    setupThemeSettings() {
+        // 설정 타입 토글 (단색/이미지)
+        document.querySelectorAll('.setting-type-toggle button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const setting = e.target.dataset.setting;
+                const type = e.target.dataset.type;
+                
+                // 형제 버튼들의 active 클래스 제거
+                e.target.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // 해당 설정의 입력 요소들 표시/숨김
+                const controls = e.target.closest('.setting-controls');
+                const colorInput = controls.querySelector('.color-input');
+                const imageWrapper = controls.querySelector('.image-upload-wrapper');
+                const preview = controls.querySelector('.image-preview');
+                
+                if (type === 'color') {
+                    colorInput.style.display = 'block';
+                    imageWrapper.style.display = 'none';
+                    preview.style.display = 'none';
+                } else {
+                    colorInput.style.display = 'none';
+                    imageWrapper.style.display = 'block';
+                    if (this.theme[setting] && this.theme[setting].image) {
+                        preview.style.display = 'block';
+                        preview.style.backgroundImage = `url(${this.theme[setting].image})`;
+                    }
+                }
+            });
+        });
+
+        // 색상 입력 변화 감지
+        ['background', 'header', 'button', 'button-primary', 'timenode', 'mainevent', 'subevent'].forEach(id => {
+            const input = document.getElementById(`${id}-color`);
+            if (input) {
+                input.addEventListener('change', () => {
+                    this.updateThemePreview();
+                });
+            }
+        });
+
+        // 이미지 업로드
+        ['background', 'header', 'timenode', 'mainevent', 'subevent'].forEach(setting => {
+            const input = document.getElementById(`${setting}-image`);
+            if (input) {
+                input.addEventListener('change', (e) => {
+                    this.handleImageUpload(e, setting);
+                });
+            }
+        });
+
+        // 테마 적용 버튼
+        const applyBtn = document.getElementById('apply-theme-btn');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.saveThemeSettings();
+                this.applyTheme();
+                this.closeModal('settings-modal');
+            });
+        }
+
+        // 기본값 초기화 버튼
+        const resetBtn = document.getElementById('reset-theme-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetThemeToDefault();
+            });
+        }
+    }
+
+    // 이미지 업로드 처리
+    handleImageUpload(event, setting) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageData = e.target.result;
+            this.theme[setting].image = imageData;
+            
+            // 미리보기 업데이트
+            const preview = document.getElementById(`${setting}-preview`);
+            if (preview) {
+                preview.style.backgroundImage = `url(${imageData})`;
+                preview.style.display = 'block';
+            }
+            
+            this.updateThemePreview();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 테마 설정 저장
+    saveThemeSettings() {
+        // 각 설정의 활성 타입 확인 및 저장
+        ['background', 'header', 'timenode', 'mainevent', 'subevent'].forEach(setting => {
+            const activeBtn = document.querySelector(`[data-setting="${setting}"].active`);
+            if (activeBtn) {
+                const type = activeBtn.dataset.type;
+                
+                this.theme[setting].type = type;
+                if (type === 'color') {
+                    const colorInput = document.getElementById(`${setting}-color`);
+                    if (colorInput) {
+                        this.theme[setting].value = colorInput.value;
+                    }
+                }
+            }
+        });
+
+        // 버튼 색상
+        const buttonColorInput = document.getElementById('button-color');
+        const buttonPrimaryColorInput = document.getElementById('button-primary-color');
+        
+        if (buttonColorInput) {
+            this.theme.button.color = buttonColorInput.value;
+        }
+        if (buttonPrimaryColorInput) {
+            this.theme.buttonPrimary.color = buttonPrimaryColorInput.value;
+        }
+    }
+
+    // 테마 미리보기 업데이트
+    updateThemePreview() {
+        // 실시간으로 테마 적용해서 미리보기
+        this.saveThemeSettings();
+        this.applyTheme();
+    }
+
+    // 테마 기본값으로 초기화
+    resetThemeToDefault() {
+        this.theme = {
+            background: { type: 'color', value: '#F9FAFB', image: null },
+            header: { type: 'color', value: '#FFFFFF', image: null },
+            button: { color: '#FFFFFF' },
+            buttonPrimary: { color: '#1F2937' },
+            timenode: { type: 'color', value: '#1F2937', image: null },
+            mainevent: { type: 'color', value: '#FFFFFF', image: null },
+            subevent: { type: 'color', value: '#FFFFFF', image: null }
+        };
+
+        this.populateThemeSettings();
+        this.applyTheme();
+    }
+
+    // 테마 설정 모달에 현재 값 채우기
+    populateThemeSettings() {
+        Object.keys(this.theme).forEach(setting => {
+            if (setting === 'button' || setting === 'buttonPrimary') {
+                const inputId = setting === 'button' ? 'button-color' : 'button-primary-color';
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = this.theme[setting].color;
+                }
+                return;
+            }
+
+            const themeItem = this.theme[setting];
+            
+            // 타입 버튼 활성화
+            const typeButtons = document.querySelectorAll(`[data-setting="${setting}"]`);
+            typeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === themeItem.type);
+            });
+
+            // 색상 값 설정
+            const colorInput = document.getElementById(`${setting}-color`);
+            if (colorInput) {
+                colorInput.value = themeItem.value;
+            }
+
+            // 이미지 미리보기
+            if (themeItem.image) {
+                const preview = document.getElementById(`${setting}-preview`);
+                if (preview) {
+                    preview.style.backgroundImage = `url(${themeItem.image})`;
+                    preview.style.display = 'block';
+                }
+            }
+
+            // 입력 요소 표시/숨김
+            const activeBtn = document.querySelector(`[data-setting="${setting}"].active`);
+            if (activeBtn) {
+                const controls = activeBtn.closest('.setting-controls');
+                const colorInputEl = controls.querySelector('.color-input');
+                const imageWrapper = controls.querySelector('.image-upload-wrapper');
+                const previewEl = controls.querySelector('.image-preview');
+                
+                if (themeItem.type === 'color') {
+                    if (colorInputEl) colorInputEl.style.display = 'block';
+                    if (imageWrapper) imageWrapper.style.display = 'none';
+                    if (previewEl) previewEl.style.display = 'none';
+                } else {
+                    if (colorInputEl) colorInputEl.style.display = 'none';
+                    if (imageWrapper) imageWrapper.style.display = 'block';
+                    if (previewEl) previewEl.style.display = themeItem.image ? 'block' : 'none';
+                }
+            }
+        });
+    }
+
+    // 테마 적용
+    applyTheme() {
+        const body = document.body;
+        const header = document.querySelector('.header');
+
+        // 배경 적용
+        if (this.theme.background.type === 'color') {
+            body.style.backgroundColor = this.theme.background.value;
+            body.style.backgroundImage = 'none';
+        } else if (this.theme.background.image) {
+            body.style.backgroundImage = `url(${this.theme.background.image})`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            body.style.backgroundAttachment = 'fixed';
+        }
+
+        // 헤더 적용
+        if (header) {
+            if (this.theme.header.type === 'color') {
+                header.style.backgroundColor = this.theme.header.value;
+                header.style.backgroundImage = 'none';
+                
+                // 헤더 텍스트 색상 자동 조절
+                const textColor = this.getContrastColor(this.theme.header.value);
+                header.style.color = textColor;
+                
+                const title = header.querySelector('h1');
+                const metas = header.querySelectorAll('.scenario-meta');
+                if (title) title.style.color = textColor;
+                metas.forEach(meta => meta.style.color = textColor);
+            } else if (this.theme.header.image) {
+                header.style.backgroundImage = `url(${this.theme.header.image})`;
+                header.style.backgroundSize = 'cover';
+                header.style.backgroundPosition = 'center';
+                header.style.color = '#FFFFFF';
+                header.style.textShadow = '1px 1px 2px rgba(0,0,0,0.5)';
+            }
+        }
+
+        // 버튼 적용
+        const secondaryButtons = document.querySelectorAll('.btn-secondary');
+        const primaryButtons = document.querySelectorAll('.btn-primary');
+        
+        secondaryButtons.forEach(btn => {
+            btn.style.backgroundColor = this.theme.button.color;
+            btn.style.color = this.getContrastColor(this.theme.button.color);
+            btn.style.borderColor = this.theme.button.color;
+        });
+
+        primaryButtons.forEach(btn => {
+            btn.style.backgroundColor = this.theme.buttonPrimary.color;
+            btn.style.color = this.getContrastColor(this.theme.buttonPrimary.color);
+        });
+
+        // 시간 노드 적용
+        this.applyTimeNodeTheme();
+        
+        // 이벤트 카드 적용
+        this.applyEventTheme();
+    }
+
+    // 시간 노드 테마 적용
+    applyTimeNodeTheme() {
+        const timeLabels = document.querySelectorAll('.time-node-label');
+        
+        timeLabels.forEach(label => {
+            if (this.theme.timenode.type === 'color') {
+                label.style.backgroundColor = this.theme.timenode.value;
+                label.style.backgroundImage = 'none';
+                label.style.color = this.getContrastColor(this.theme.timenode.value);
+                label.style.textShadow = 'none';
+            } else if (this.theme.timenode.image) {
+                label.style.backgroundImage = `url(${this.theme.timenode.image})`;
+                label.style.backgroundSize = 'cover';
+                label.style.backgroundPosition = 'center';
+                label.style.color = '#FFFFFF';
+                label.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+            }
+        });
+    }
+
+    // 이벤트 카드 테마 적용
+    applyEventTheme() {
+        // 메인 이벤트 카드
+        const mainCards = document.querySelectorAll('.main-event-card');
+        mainCards.forEach(card => {
+            if (this.theme.mainevent.type === 'color') {
+                card.style.backgroundColor = this.theme.mainevent.value;
+                card.style.backgroundImage = 'none';
+                
+                const textColor = this.getContrastColor(this.theme.mainevent.value);
+                card.style.color = textColor;
+                
+                const title = card.querySelector('.event-title');
+                if (title) {
+                    title.style.color = textColor;
+                    title.style.textShadow = 'none';
+                }
+            } else if (this.theme.mainevent.image) {
+                card.style.backgroundImage = `url(${this.theme.mainevent.image})`;
+                card.style.backgroundSize = 'cover';
+                card.style.backgroundPosition = 'center';
+                card.style.color = '#FFFFFF';
+                
+                const title = card.querySelector('.event-title');
+                if (title) {
+                    title.style.color = '#FFFFFF';
+                    title.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+                }
+            }
+        });
+
+        // 서브 이벤트 카드
+        const subCards = document.querySelectorAll('.sub-event-card');
+        subCards.forEach(card => {
+            if (this.theme.subevent.type === 'color') {
+                card.style.backgroundColor = this.theme.subevent.value;
+                card.style.backgroundImage = 'none';
+                card.style.color = this.getContrastColor(this.theme.subevent.value);
+                card.style.textShadow = 'none';
+            } else if (this.theme.subevent.image) {
+                card.style.backgroundImage = `url(${this.theme.subevent.image})`;
+                card.style.backgroundSize = 'cover';
+                card.style.backgroundPosition = 'center';
+                card.style.color = '#FFFFFF';
+                card.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+            }
+        });
+    }
+
     setupEventListeners() {
         // 헤더 버튼들
         document.getElementById('scenario-btn').addEventListener('click', () => this.openScenarioModal());
+        document.getElementById('settings-btn').addEventListener('click', () => this.openSettingsModal());
         document.getElementById('time-btn').addEventListener('click', () => this.openTimeModal());
         document.getElementById('event-btn').addEventListener('click', () => this.openEventModal());
         document.getElementById('export-btn').addEventListener('click', () => this.exportData());
         document.getElementById('import-file').addEventListener('change', (e) => this.importData(e));
 
-        // 모달 관련 이벤트
         this.setupModalEvents();
         this.setupFormEvents();
     }
 
-    // 컨텍스트 메뉴 설정
+    openSettingsModal() {
+        this.populateThemeSettings();
+        this.openModal('settings-modal');
+    }
+}
+
+// TRPG Timeline Application - Part 2 (계속)
+
     setupContextMenu() {
         const contextMenu = document.getElementById('context-menu');
         const contextEdit = document.getElementById('context-edit');
         const contextDelete = document.getElementById('context-delete');
 
-        // 컨텍스트 메뉴 외부 클릭시 닫기
         document.addEventListener('click', (e) => {
             if (!contextMenu.contains(e.target)) {
                 this.hideContextMenu();
             }
         });
 
-        // 우클릭 방지 (기본 컨텍스트 메뉴 안나오게)
         document.addEventListener('contextmenu', (e) => {
-            // 타임라인 영역에서만 기본 컨텍스트 메뉴 방지
             if (e.target.closest('.timeline-container')) {
                 e.preventDefault();
             }
         });
 
-        // 컨텍스트 메뉴 액션
         contextEdit.addEventListener('click', () => {
             this.handleContextEdit();
             this.hideContextMenu();
@@ -144,7 +506,6 @@ class TRPGTimeline {
         contextMenu.style.left = e.pageX + 'px';
         contextMenu.style.top = e.pageY + 'px';
 
-        // 화면 밖으로 나가지 않도록 조정
         const rect = contextMenu.getBoundingClientRect();
         if (rect.right > window.innerWidth) {
             contextMenu.style.left = (e.pageX - rect.width) + 'px';
@@ -157,8 +518,7 @@ class TRPGTimeline {
     }
 
     hideContextMenu() {
-        const contextMenu = document.getElementById('context-menu');
-        contextMenu.style.display = 'none';
+        document.getElementById('context-menu').style.display = 'none';
         this.contextMenuTarget = null;
         this.contextMenuType = null;
     }
@@ -184,7 +544,6 @@ class TRPGTimeline {
     }
 
     setupModalEvents() {
-        // 모달 닫기 버튼들
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modalId = e.target.closest('button').dataset.modal;
@@ -192,7 +551,6 @@ class TRPGTimeline {
             });
         });
 
-        // 모달 배경 클릭으로 닫기
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -228,7 +586,6 @@ class TRPGTimeline {
         document.getElementById('event-content').addEventListener('input', (e) => this.updateCharCount(e.target));
     }
 
-    // 렌더링 함수들
     render() {
         this.updateHeader();
         this.renderTimeline();
@@ -251,6 +608,11 @@ class TRPGTimeline {
             const timeNodeElement = this.createTimeNodeElement(timeNode, index, hierarchicalNodes.length);
             container.appendChild(timeNodeElement);
         });
+
+        // 렌더링 후 테마 적용
+        setTimeout(() => {
+            this.applyTheme();
+        }, 10);
     }
 
     createTimeNodeElement(timeNode, index, totalNodes) {
@@ -267,7 +629,7 @@ class TRPGTimeline {
             container.appendChild(dropZone);
         }
 
-        // 붙은 이벤트들을 시간 노드 앞에 배치하여 확장 시 공간 확보
+        // 붙은 이벤트들
         attachedEvents.forEach((event, eventIndex) => {
             const attachedEvent = this.createAttachedEventElement(event, eventIndex);
             container.appendChild(attachedEvent);
@@ -289,7 +651,6 @@ class TRPGTimeline {
         this.setupDropZone(eventsContainer, timeNode.id);
 
         timeNodeEvents.sort((a, b) => a.order - b.order).forEach((event, eventIndex) => {
-            // 이벤트 위 드롭존
             if (eventIndex === 0) {
                 const dropZone = this.createDropZone('event', event, 'before');
                 eventsContainer.appendChild(dropZone);
@@ -298,7 +659,6 @@ class TRPGTimeline {
             const eventElement = this.createEventElement(event, timeNode.id);
             eventsContainer.appendChild(eventElement);
 
-            // 이벤트 아래 드롭존
             const dropZone = this.createDropZone('event', event, 'after');
             eventsContainer.appendChild(dropZone);
         });
@@ -318,18 +678,15 @@ class TRPGTimeline {
         const timeNodeDiv = document.createElement('div');
         timeNodeDiv.className = 'time-node';
 
-        // 시간 노드 원
         const circle = document.createElement('div');
         circle.className = `time-node-circle ${timeNode.size || 'small'}`;
         timeNodeDiv.appendChild(circle);
 
-        // 시간 라벨
         const label = document.createElement('div');
         label.className = `time-node-label ${timeNode.size || 'small'}`;
         label.textContent = timeNode.timeValue;
         label.draggable = true;
 
-        // 시간 노드 액션 버튼들
         const actions = document.createElement('div');
         actions.className = 'time-node-actions';
         actions.innerHTML = `
@@ -342,9 +699,7 @@ class TRPGTimeline {
         `;
         label.appendChild(actions);
 
-        // 시간 노드 이벤트 리스너
         this.setupTimeNodeEventListeners(label, timeNode);
-
         timeNodeDiv.appendChild(label);
         return timeNodeDiv;
     }
@@ -356,73 +711,18 @@ class TRPGTimeline {
         if (event.type === 'main') {
             const position = this.getEventPosition(event, timeNodeId);
             
-            if (position === 'left') {
-                container.innerHTML = `
-                    <div class="main-event-wrapper position-left">
-                        <div class="main-event-side left">
-                            <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                                <div class="main-event-header" data-event-id="${event.id}">
-                                    <div class="main-event-meta">
-                                        <div>
-                                            <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                                ${event.character}
-                                            </div>
-                                            <div class="event-title">${event.title}</div>
-                                        </div>
-                                        <div class="event-actions">
-                                            <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                            <div class="event-action-buttons">
-                                                <button class="action-btn edit-event" data-event-id="${event.id}">
-                                                    <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                                </button>
-                                                <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
-                            </div>
-                        </div>
-                        <div class="main-event-side right"></div>
+            const eventHTML = `
+                <div class="main-event-wrapper position-${position}">
+                    <div class="main-event-side left">
+                        ${position === 'left' ? this.createMainEventCard(event) : ''}
                     </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <div class="main-event-wrapper position-right">
-                        <div class="main-event-side left"></div>
-                        <div class="main-event-side right">
-                            <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                                <div class="main-event-header" data-event-id="${event.id}">
-                                    <div class="main-event-meta">
-                                        <div>
-                                            <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                                ${event.character}
-                                            </div>
-                                            <div class="event-title">${event.title}</div>
-                                        </div>
-                                        <div class="event-actions">
-                                            <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                            <div class="event-action-buttons">
-                                                <button class="action-btn edit-event" data-event-id="${event.id}">
-                                                    <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                                </button>
-                                                <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
-                            </div>
-                        </div>
+                    <div class="main-event-side right">
+                        ${position === 'right' ? this.createMainEventCard(event) : ''}
                     </div>
-                `;
-            }
-
-            // 메인 이벤트 이벤트 리스너
+                </div>
+            `;
+            
+            container.innerHTML = eventHTML;
             this.setupMainEventListeners(container, event);
         } else {
             container.innerHTML = `
@@ -443,18 +743,44 @@ class TRPGTimeline {
                     </div>
                 </div>
             `;
-
-            // 서브 이벤트 이벤트 리스너
             this.setupSubEventListeners(container, event);
         }
 
         return container;
     }
 
+    createMainEventCard(event) {
+        return `
+            <div class="main-event-card" draggable="true" data-event-id="${event.id}">
+                <div class="main-event-header" data-event-id="${event.id}">
+                    <div class="main-event-meta">
+                        <div>
+                            <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
+                                ${event.character}
+                            </div>
+                            <div class="event-title">${event.title}</div>
+                        </div>
+                        <div class="event-actions">
+                            <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
+                            <div class="event-action-buttons">
+                                <button class="action-btn edit-event" data-event-id="${event.id}">
+                                    <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
+                                </button>
+                                <button class="action-btn delete delete-event" data-event-id="${event.id}">
+                                    <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
+            </div>
+        `;
+    }
+
     createAttachedEventElement(event, index) {
         const container = document.createElement('div');
         
-        // 원래 사건의 위치를 기반으로 결정
         let side;
         if (event.position === 'left') {
             side = 'left';
@@ -467,79 +793,22 @@ class TRPGTimeline {
         
         container.className = `attached-event ${side}`;
         
-        // 메인 이벤트와 완전히 동일한 HTML 구조 사용
-        if (side === 'left') {
-            container.innerHTML = `
-                <div class="main-event-wrapper position-left">
-                    <div class="main-event-side left">
-                        <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                            <div class="main-event-header" data-event-id="${event.id}">
-                                <div class="main-event-meta">
-                                    <div>
-                                        <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                            ${event.character}
-                                        </div>
-                                        <div class="event-title">${event.title}</div>
-                                    </div>
-                                    <div class="event-actions">
-                                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                        <div class="event-action-buttons">
-                                            <button class="action-btn edit-event" data-event-id="${event.id}">
-                                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                            </button>
-                                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
-                        </div>
-                    </div>
-                    <div class="main-event-side right"></div>
+        const eventHTML = `
+            <div class="main-event-wrapper position-${side}">
+                <div class="main-event-side left">
+                    ${side === 'left' ? this.createMainEventCard(event) : ''}
                 </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="main-event-wrapper position-right">
-                    <div class="main-event-side left"></div>
-                    <div class="main-event-side right">
-                        <div class="main-event-card" draggable="true" data-event-id="${event.id}">
-                            <div class="main-event-header" data-event-id="${event.id}">
-                                <div class="main-event-meta">
-                                    <div>
-                                        <div class="event-character" style="background-color: ${this.getCharacterColor(event.character)}">
-                                            ${event.character}
-                                        </div>
-                                        <div class="event-title">${event.title}</div>
-                                    </div>
-                                    <div class="event-actions">
-                                        <i class="event-toggle" data-lucide="${event.expanded ? 'chevron-up' : 'chevron-down'}" style="width: 16px; height: 16px;"></i>
-                                        <div class="event-action-buttons">
-                                            <button class="action-btn edit-event" data-event-id="${event.id}">
-                                                <i data-lucide="edit" style="width: 12px; height: 12px;"></i>
-                                            </button>
-                                            <button class="action-btn delete delete-event" data-event-id="${event.id}">
-                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            ${event.expanded ? `<div class="event-content">${event.content || '내용이 없습니다.'}</div>` : ''}
-                        </div>
-                    </div>
+                <div class="main-event-side right">
+                    ${side === 'right' ? this.createMainEventCard(event) : ''}
                 </div>
-            `;
-        }
-
-        // 메인 이벤트와 동일한 이벤트 리스너 사용
+            </div>
+        `;
+        
+        container.innerHTML = eventHTML;
         this.setupMainEventListeners(container, event);
         return container;
     }
 
-    // 유틸리티 함수들
     getHierarchicalTimeNodes() {
         const rootNodes = this.timeNodes.filter(node => !node.parentTimeNodeId).sort((a, b) => a.order - b.order);
         const result = [];
@@ -570,7 +839,6 @@ class TRPGTimeline {
         return character ? character.color : '#374151';
     }
 
-    // 드롭 존 및 이벤트 리스너 설정
     createDropZone(type, target, position) {
         const dropZone = document.createElement('div');
         dropZone.className = type === 'time' ? 'drop-zone' : 'drop-zone event-drop-zone';
@@ -615,14 +883,11 @@ class TRPGTimeline {
         });
     }
 
-    // 이벤트 리스너 설정 함수들
     setupTimeNodeEventListeners(label, timeNode) {
-        // 우클릭 컨텍스트 메뉴
         label.addEventListener('contextmenu', (e) => {
             this.showContextMenu(e, timeNode, 'time');
         });
 
-        // 드래그 시작
         label.addEventListener('dragstart', (e) => {
             this.draggedTime = timeNode;
             label.classList.add('dragging');
@@ -633,7 +898,6 @@ class TRPGTimeline {
             this.draggedTime = null;
         });
 
-        // 드롭 처리
         label.addEventListener('dragover', (e) => {
             e.preventDefault();
             if (this.draggedEvent) {
@@ -658,7 +922,6 @@ class TRPGTimeline {
             }
         });
 
-        // 수정/삭제 버튼
         label.querySelector('.edit-time').addEventListener('click', (e) => {
             e.stopPropagation();
             this.editTime(timeNode);
@@ -674,12 +937,12 @@ class TRPGTimeline {
         const card = container.querySelector('.main-event-card');
         const header = container.querySelector('.main-event-header');
 
-        // 우클릭 컨텍스트 메뉴
+        if (!card || !header) return;
+
         card.addEventListener('contextmenu', (e) => {
             this.showContextMenu(e, event, 'event');
         });
 
-        // 드래그
         card.addEventListener('dragstart', (e) => {
             this.draggedEvent = event;
             card.classList.add('dragging');
@@ -690,34 +953,39 @@ class TRPGTimeline {
             this.draggedEvent = null;
         });
 
-        // 확장/축소
         header.addEventListener('click', (e) => {
             if (!this.draggedEvent) {
                 this.toggleEventExpansion(event.id);
             }
         });
 
-        // 수정/삭제 버튼
-        container.querySelector('.edit-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.editEvent(event);
-        });
+        const editBtn = container.querySelector('.edit-event');
+        const deleteBtn = container.querySelector('.delete-event');
 
-        container.querySelector('.delete-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteEvent(event.id);
-        });
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editEvent(event);
+            });
+        }
+
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteEvent(event.id);
+            });
+        }
     }
 
     setupSubEventListeners(container, event) {
         const card = container.querySelector('.sub-event-card');
 
-        // 우클릭 컨텍스트 메뉴
+        if (!card) return;
+
         card.addEventListener('contextmenu', (e) => {
             this.showContextMenu(e, event, 'event');
         });
 
-        // 드래그
         card.addEventListener('dragstart', (e) => {
             e.stopPropagation();
             this.draggedEvent = event;
@@ -729,16 +997,22 @@ class TRPGTimeline {
             this.draggedEvent = null;
         });
 
-        // 수정/삭제 버튼
-        container.querySelector('.edit-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.editEvent(event);
-        });
+        const editBtn = container.querySelector('.edit-event');
+        const deleteBtn = container.querySelector('.delete-event');
 
-        container.querySelector('.delete-event').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteEvent(event.id);
-        });
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editEvent(event);
+            });
+        }
+
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteEvent(event.id);
+            });
+        }
     }
 
     // 드래그 앤 드롭 핸들러들
@@ -746,7 +1020,6 @@ class TRPGTimeline {
         if (!this.draggedEvent) return;
 
         if (this.draggedEvent.timeNodeId === targetTimeNodeId && targetOrder !== null) {
-            // 같은 시간대에서 순서 변경
             this.events = this.events.map(event => {
                 if (event.timeNodeId !== targetTimeNodeId) return event;
                 
@@ -767,7 +1040,6 @@ class TRPGTimeline {
                 return event;
             });
         } else {
-            // 다른 시간대로 이동
             const targetTimeEvents = this.events.filter(e => e.timeNodeId === targetTimeNodeId);
             const maxOrder = targetTimeEvents.length > 0 ? Math.max(...targetTimeEvents.map(e => e.order)) : -1;
             
@@ -807,7 +1079,6 @@ class TRPGTimeline {
     handleTimeDropOnTimeNode(targetTimeNodeId) {
         if (!this.draggedTime || this.draggedTime.id === targetTimeNodeId) return;
 
-        // 부모-자식 순환 관계 방지
         if (this.isDescendant(targetTimeNodeId, this.draggedTime.id)) {
             this.draggedTime = null;
             return;
@@ -864,7 +1135,6 @@ class TRPGTimeline {
         return this.isDescendant(node.parentTimeNodeId, potentialAncestorId);
     }
 
-    // 이벤트 관리 함수들
     toggleEventExpansion(eventId) {
         this.events = this.events.map(event => 
             event.id === eventId 
@@ -875,7 +1145,6 @@ class TRPGTimeline {
         this.renderTimeline();
         this.createIcons();
         
-        // 확장 후 스크롤 조정 (선택사항)
         setTimeout(() => {
             const expandedElement = document.querySelector(`[data-event-id="${eventId}"]`);
             if (expandedElement) {
@@ -912,7 +1181,6 @@ class TRPGTimeline {
         this.openTimeModal();
     }
 
-    // 모달 관리 함수들
     openScenarioModal() {
         document.getElementById('modal-scenario-title').value = this.scenario.title;
         document.getElementById('modal-scenario-overview').value = this.scenario.overview;
@@ -963,7 +1231,6 @@ class TRPGTimeline {
         }
     }
 
-    // 폼 관련 함수들
     populateTimeModal(timeNode) {
         document.getElementById('time-type').value = timeNode.timeType;
         document.getElementById('parent-time').value = timeNode.parentTimeNodeId || '';
@@ -1119,7 +1386,6 @@ class TRPGTimeline {
         select.value = currentValue;
     }
 
-    // 저장 함수들
     saveTime() {
         const timeType = document.getElementById('time-type').value;
         const parentTimeNodeId = document.getElementById('parent-time').value || null;
@@ -1146,14 +1412,12 @@ class TRPGTimeline {
         }
 
         if (this.editingTime) {
-            // 수정
             this.timeNodes = this.timeNodes.map(time => 
                 time.id === this.editingTime.id 
                     ? { ...time, timeType, timeValue, size, parentTimeNodeId: parentTimeNodeId ? parseInt(parentTimeNodeId) : null }
                     : time
             );
         } else {
-            // 추가
             let targetNodes;
             if (parentTimeNodeId) {
                 targetNodes = this.timeNodes.filter(t => t.parentTimeNodeId === parseInt(parentTimeNodeId));
@@ -1197,14 +1461,12 @@ class TRPGTimeline {
         }
 
         if (this.editingEvent) {
-            // 수정
             this.events = this.events.map(event => 
                 event.id === this.editingEvent.id 
                     ? { ...event, timeNodeId: parseInt(timeNodeId), type, character, title, content, position }
                     : event
             );
         } else {
-            // 추가
             const timeNodeEvents = this.events.filter(e => e.timeNodeId === parseInt(timeNodeId));
             const maxOrder = timeNodeEvents.length > 0 ? Math.max(...timeNodeEvents.map(e => e.order)) : -1;
             
@@ -1227,7 +1489,6 @@ class TRPGTimeline {
         this.createIcons();
     }
 
-    // 캐릭터 관리
     addCharacter() {
         const name = document.getElementById('character-name').value.trim();
         const color = document.getElementById('character-color').value;
@@ -1238,7 +1499,6 @@ class TRPGTimeline {
         }
 
         if (this.editingCharacter) {
-            // 수정
             this.scenario.characters = this.scenario.characters.map(char => 
                 char.id === this.editingCharacter.id 
                     ? { ...char, name, color }
@@ -1246,7 +1506,6 @@ class TRPGTimeline {
             );
             this.editingCharacter = null;
         } else {
-            // 추가
             this.scenario.characters.push({
                 id: Date.now(),
                 name,
@@ -1298,12 +1557,10 @@ class TRPGTimeline {
                 </div>
             `;
             
-            // 이름 클릭으로 수정
             item.querySelector('.character-name').addEventListener('click', () => {
                 this.editCharacter(character);
             });
             
-            // 기존 버튼 이벤트
             item.querySelector('.edit-character').addEventListener('click', () => this.editCharacter(character));
             item.querySelector('.delete-character').addEventListener('click', () => this.deleteCharacter(character.id));
             
@@ -1311,12 +1568,12 @@ class TRPGTimeline {
         });
     }
 
-    // 데이터 내보내기/가져오기
     exportData() {
         const data = {
             scenario: this.scenario,
             timeNodes: this.timeNodes,
-            events: this.events
+            events: this.events,
+            theme: this.theme  // 테마 설정도 함께 내보내기
         };
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1341,12 +1598,8 @@ class TRPGTimeline {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                console.log('파일 읽기 완료, 내용:', e.target.result);
-                
                 const data = JSON.parse(e.target.result);
-                console.log('JSON 파싱 완료:', data);
                 
-                // 데이터 구조 확인
                 if (!data || typeof data !== 'object') {
                     alert('올바른 JSON 파일이 아닙니다.');
                     return;
@@ -1381,8 +1634,13 @@ class TRPGTimeline {
                     expanded: false 
                 }));
 
-                console.log('데이터 로드 완료');
+                // 테마 설정 로드 (없으면 기본값 사용)
+                if (data.theme) {
+                    this.theme = { ...this.theme, ...data.theme };
+                }
+
                 this.render();
+                this.applyTheme();
                 this.createIcons();
                 alert('파일을 성공적으로 불러왔습니다!');
                 
@@ -1400,99 +1658,6 @@ class TRPGTimeline {
         reader.readAsText(file, 'UTF-8');
         event.target.value = '';
     }
-}
-
-function drawElbowLine(timeBox, eventBox) {
-  const timeRect = timeBox.getBoundingClientRect();
-  const eventRect = eventBox.getBoundingClientRect();
-
-  const timeX = timeRect.right + window.scrollX; // timeBox 오른쪽 중앙
-  const timeY = timeRect.top + timeRect.height / 2 + window.scrollY;
-
-  const eventX = eventRect.left + window.scrollX; // eventBox 왼쪽 중앙
-  const eventY = eventRect.top + eventRect.height / 2 + window.scrollY;
-
-  const midX = (timeX + eventX) / 2; // 꺾이는 지점 (중간 x값)
-
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  const d = `M ${timeX},${timeY} H ${midX} V ${eventY} H ${eventX}`;
-  path.setAttribute("d", d);
-  path.setAttribute("stroke", "black");
-  path.setAttribute("stroke-width", "2");
-  path.setAttribute("fill", "none");
-
-  return path;
-}
-
-function drawAllLines() {
-  svg.innerHTML = "";
-  const timeBoxes = document.querySelectorAll(".time-box");
-  const eventBoxes = document.querySelectorAll(".event-box");
-
-  timeBoxes.forEach((timeBox, index) => {
-    const eventBox = eventBoxes[index];
-    if (eventBox) {
-      const path = drawElbowLine(timeBox, eventBox);
-      svg.appendChild(path);
-    }
-  });
-}
-
-// ============================
-// 기존 script.js 마지막 부분 ↓
-// ============================
-
-// 창 크기 변경 시 선 업데이트
-window.addEventListener("resize", () => {
-  updateConnectionLines();
-});
-
-// ============================
-// 새로 추가할 함수
-// ============================
-
-function updateConnectionLines() {
-  const svg = document.getElementById("connection-lines");
-  if (!svg) return;
-
-  svg.innerHTML = "";
-
-  const timeBoxes = document.querySelectorAll(".time-box");
-  const eventBoxes = document.querySelectorAll(".event-box");
-
-  timeBoxes.forEach((timeBox, index) => {
-    const eventBox = eventBoxes[index];
-    if (!eventBox) return;
-
-    const timeRect = timeBox.getBoundingClientRect();
-    const eventRect = eventBox.getBoundingClientRect();
-
-    const svgRect = svg.getBoundingClientRect();
-
-    const timeX = timeRect.left + timeRect.width / 2 - svgRect.left;
-    const timeY = timeRect.top + timeRect.height / 2 - svgRect.top;
-
-    let eventX, eventY;
-    if (eventBox.classList.contains("left")) {
-      // 왼쪽 사건박스 → 오른쪽 끝에서 연결
-      eventX = eventRect.right - svgRect.left;
-      eventY = eventRect.top + eventRect.height / 2 - svgRect.top;
-    } else {
-      // 오른쪽 사건박스 → 왼쪽 끝에서 연결
-      eventX = eventRect.left - svgRect.left;
-      eventY = eventRect.top + eventRect.height / 2 - svgRect.top;
-    }
-
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", timeX);
-    line.setAttribute("y1", timeY);
-    line.setAttribute("x2", eventX);
-    line.setAttribute("y2", eventY);
-    line.setAttribute("stroke", "#555");
-    line.setAttribute("stroke-width", "2");
-
-    svg.appendChild(line);
-  });
 }
 
 // 앱 초기화
