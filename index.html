@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRPG 시나리오 타임라인</title>
-    <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <svg id="connection-lines" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></svg>
-
     <div id="app">
         <!-- 헤더 -->
         <div class="header">
@@ -22,6 +20,9 @@
                 <div class="header-buttons">
                     <button id="scenario-btn" class="btn btn-secondary">
                         <i data-lucide="file-text"></i>시나리오
+                    </button>
+                    <button id="settings-btn" class="btn btn-secondary">
+                        <i data-lucide="settings"></i>설정
                     </button>
                     <button id="time-btn" class="btn btn-secondary">
                         <i data-lucide="clock"></i>시간 추가
@@ -43,9 +44,7 @@
         <!-- 타임라인 -->
         <div class="timeline-container">
             <div class="timeline-wrapper">
-                <!-- 중앙 라인 -->
                 <div class="timeline-line"></div>
-                <!-- 타임라인 컨텐트 -->
                 <div id="timeline-content"></div>
             </div>
         </div>
@@ -83,6 +82,138 @@
                             <button id="add-character-btn" class="btn btn-primary">추가</button>
                         </div>
                         <div id="characters-list" class="characters-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설정 모달 -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content" style="max-width: 40rem;">
+                <div class="modal-header">
+                    <h2>테마 설정</h2>
+                    <button class="modal-close" data-modal="settings-modal">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-grid">
+                        <!-- 배경 설정 -->
+                        <div class="settings-section">
+                            <h3>메인 배경</h3>
+                            <div class="setting-item">
+                                <div class="setting-controls">
+                                    <div class="setting-type-toggle">
+                                        <button type="button" class="active" data-setting="background" data-type="color">단색</button>
+                                        <button type="button" data-setting="background" data-type="image">이미지</button>
+                                    </div>
+                                    <input type="color" id="background-color" class="color-input" value="#F9FAFB">
+                                    <div class="image-upload-wrapper" style="display: none;">
+                                        <button class="image-upload-btn">이미지 선택</button>
+                                        <input type="file" class="image-upload-input" id="background-image" accept="image/*">
+                                    </div>
+                                    <div id="background-preview" class="image-preview" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 헤더 설정 -->
+                        <div class="settings-section">
+                            <h3>헤더</h3>
+                            <div class="setting-item">
+                                <div class="setting-controls">
+                                    <div class="setting-type-toggle">
+                                        <button type="button" class="active" data-setting="header" data-type="color">단색</button>
+                                        <button type="button" data-setting="header" data-type="image">이미지</button>
+                                    </div>
+                                    <input type="color" id="header-color" class="color-input" value="#FFFFFF">
+                                    <div class="image-upload-wrapper" style="display: none;">
+                                        <button class="image-upload-btn">이미지 선택</button>
+                                        <input type="file" class="image-upload-input" id="header-image" accept="image/*">
+                                    </div>
+                                    <div id="header-preview" class="image-preview" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 버튼 설정 -->
+                        <div class="settings-section">
+                            <h3>버튼</h3>
+                            <div class="setting-item">
+                                <label>기본 버튼 색상</label>
+                                <div class="setting-controls">
+                                    <input type="color" id="button-color" class="color-input" value="#FFFFFF">
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>주요 버튼 색상</label>
+                                <div class="setting-controls">
+                                    <input type="color" id="button-primary-color" class="color-input" value="#1F2937">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 시간 노드 설정 -->
+                        <div class="settings-section">
+                            <h3>시간 노드</h3>
+                            <div class="setting-item">
+                                <div class="setting-controls">
+                                    <div class="setting-type-toggle">
+                                        <button type="button" class="active" data-setting="timenode" data-type="color">단색</button>
+                                        <button type="button" data-setting="timenode" data-type="image">이미지</button>
+                                    </div>
+                                    <input type="color" id="timenode-color" class="color-input" value="#1F2937">
+                                    <div class="image-upload-wrapper" style="display: none;">
+                                        <button class="image-upload-btn">이미지 선택</button>
+                                        <input type="file" class="image-upload-input" id="timenode-image" accept="image/*">
+                                    </div>
+                                    <div id="timenode-preview" class="image-preview" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 메인 이벤트 설정 -->
+                        <div class="settings-section">
+                            <h3>메인 이벤트</h3>
+                            <div class="setting-item">
+                                <div class="setting-controls">
+                                    <div class="setting-type-toggle">
+                                        <button type="button" class="active" data-setting="mainevent" data-type="color">단색</button>
+                                        <button type="button" data-setting="mainevent" data-type="image">이미지</button>
+                                    </div>
+                                    <input type="color" id="mainevent-color" class="color-input" value="#FFFFFF">
+                                    <div class="image-upload-wrapper" style="display: none;">
+                                        <button class="image-upload-btn">이미지 선택</button>
+                                        <input type="file" class="image-upload-input" id="mainevent-image" accept="image/*">
+                                    </div>
+                                    <div id="mainevent-preview" class="image-preview" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 서브 이벤트 설정 -->
+                        <div class="settings-section">
+                            <h3>서브 이벤트</h3>
+                            <div class="setting-item">
+                                <div class="setting-controls">
+                                    <div class="setting-type-toggle">
+                                        <button type="button" class="active" data-setting="subevent" data-type="color">단색</button>
+                                        <button type="button" data-setting="subevent" data-type="image">이미지</button>
+                                    </div>
+                                    <input type="color" id="subevent-color" class="color-input" value="#FFFFFF">
+                                    <div class="image-upload-wrapper" style="display: none;">
+                                        <button class="image-upload-btn">이미지 선택</button>
+                                        <input type="file" class="image-upload-input" id="subevent-image" accept="image/*">
+                                    </div>
+                                    <div id="subevent-preview" class="image-preview" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem;">
+                        <button id="reset-theme-btn" class="btn btn-secondary">기본값으로 초기화</button>
+                        <button id="apply-theme-btn" class="btn btn-primary">적용</button>
                     </div>
                 </div>
             </div>
@@ -207,4 +338,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
