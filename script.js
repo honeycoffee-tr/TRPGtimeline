@@ -1,4 +1,4 @@
-// TRPG Timeline Application - Part 1
+// TRPG Timeline Application
 class TRPGTimeline {
     constructor() {
         this.scenario = {
@@ -462,9 +462,6 @@ class TRPGTimeline {
         this.populateThemeSettings();
         this.openModal('settings-modal');
     }
-}
-
-// TRPG Timeline Application - Part 2 (계속)
 
     setupContextMenu() {
         const contextMenu = document.getElementById('context-menu');
